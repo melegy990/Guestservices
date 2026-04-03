@@ -7,6 +7,22 @@
 <title>Stay Services</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAq4ektd1yuEhjaloNqZeStwthI08nhA4g",
+    authDomain: "stayservicess-b0a7b.firebaseapp.com",
+    projectId: "stayservicess-b0a7b",
+    storageBucket: "stayservicess-b0a7b.firebasestorage.app",
+    messagingSenderId: "1096084995236",
+    appId: "1:1096084995236:web:af3f22be28a3d65f913a31"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  window.db = getFirestore(app);
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -287,7 +303,7 @@ body.rtl .modal-h h3{font-family:'Tajawal',sans-serif}
         </div>
       </div>
     </div>
-    <div class="modal-f"><button class="btn-cancel" onclick="closeModal()" id="btn-cancel">Cancel</button><button class="btn-save" id="save-btn" onclick="saveService()">Add</button></div>
+    <div class="modal-f"><button class="btn-cancel" onclick="closeModal()" id="btn-cancel">Cancel</button><button class="btn-save" id="save-btn" onclick="saveServiceForm()">Add</button></div>
   </div>
 </div>
 
@@ -512,16 +528,35 @@ const DEFAULT_SERVICES=[
    price:0,image:"https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80",category:"Cleaning"}
 ];
 
-function loadServices(){
-  const stored=localStorage.getItem("stayServices");
-  return stored?JSON.parse(stored):DEFAULT_SERVICES;
+async function loadServices(){
+  if(!window.db){await new Promise(r=>setTimeout(r,500));if(!window.db)return DEFAULT_SERVICES;}
+  try{
+    const querySnapshot=await getDocs(collection(window.db,"services"));
+    if(querySnapshot.empty)return DEFAULT_SERVICES;
+    return querySnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+  }catch(e){console.error("Load error:",e);return DEFAULT_SERVICES;}
 }
-function saveServices(){
-  localStorage.setItem("stayServices",JSON.stringify(services));
+async function saveService(service){
+  if(!window.db)return;
+  try{await setDoc(doc(window.db,"services",String(service.id)),service);}
+  catch(e){console.error("Save error:",e);}
+}
+async function deleteService(id){
+  if(!window.db)return;
+  try{await deleteDoc(doc(window.db,"services",String(id)));}
+  catch(e){console.error("Delete error:",e);}
+}
+async function initServices(){
+  services=await loadServices();
+  nextId=Math.max(...services.map(s=>s.id),20)+1;
+  if(services===DEFAULT_SERVICES){
+    for(const s of DEFAULT_SERVICES){await saveService(s);}
+  }
+  renderPublic();
 }
 
-let services=loadServices();
-let nextId=Math.max(...services.map(s=>s.id),20)+1;
+let services=DEFAULT_SERVICES;
+let nextId=20;
 let editingId=null,deleteId=null,activeFilter="All",lang="en";
 const ICONS={"Rentals":"\ud83d\udeb4","Transport":"\ud83d\ude97","Cleaning":"\ud83e\uddf9","default":"\ud83c\udfe0"};
 
@@ -673,7 +708,7 @@ function clearForm(){
   ["e-title","e-price","e-cat"].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.add("hidden");e.textContent="";}});
   resetUp();
 }
-function saveService(){
+async function saveServiceForm(){
   const t=T[lang];
   const title=document.getElementById("f-title").value.trim();
   const price=document.getElementById("f-price").value;
@@ -686,10 +721,18 @@ function saveService(){
   if(!cat){showE("e-cat",t.errCat);ok=false;}else hideE("e-cat");
   if(!ok)return;
   const sv={title,description:desc,price:Number(price),image:img,category:cat};
-  if(editingId){const i=services.findIndex(x=>x.id===editingId);services[i]={...services[i],...sv};toast(t.tUpdated,"ok");}
-  else{services.unshift({id:nextId++,...sv});toast(t.tAdded,"ok");}
-  saveServices();
-  closeModal();renderAdmin();
+  if(editingId){
+    const i=services.findIndex(x=>x.id===editingId);
+    services[i]={...services[i],...sv};
+    await saveService(services[i]);
+    toast(t.tUpdated,"ok");
+  }else{
+    const newSv={id:nextId++,...sv};
+    services.unshift(newSv);
+    await saveService(newSv);
+    toast(t.tAdded,"ok");
+  }
+  closeModal();renderAdmin();renderPublic();
 }
 function showE(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.remove("hidden");}}
 function hideE(id){const e=document.getElementById(id);if(e)e.classList.add("hidden");}
@@ -712,10 +755,10 @@ function closeContact(){document.getElementById("contact-modal").classList.add("
 // ─── DELETE ───────────────────────────────────────────────────────────────────
 function askDel(id){deleteId=id;document.getElementById("del-modal").classList.remove("hidden");}
 function closeDel(){deleteId=null;document.getElementById("del-modal").classList.add("hidden");}
-function confirmDel(){
+async function confirmDel(){
+  await deleteService(deleteId);
   services=services.filter(x=>x.id!==deleteId);
-  saveServices();
-  closeDel();renderAdmin();toast(T[lang].tDeleted,"inf");
+  closeDel();renderAdmin();renderPublic();toast(T[lang].tDeleted,"inf");
 }
 
 // ─── IMAGE UPLOAD ─────────────────────────────────────────────────────────────
@@ -749,6 +792,7 @@ function esc(v){const d=document.createElement("div");d.textContent=v||"";return
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 setLang("en");
 show("public");
+initServices();
 </script>
 
 </body>
