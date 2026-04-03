@@ -460,8 +460,8 @@ de:{rtl:false,
   tUpdated:"Aktualisiert \u2713",tAdded:"Hinzugef\u00fcgt \u2713",tDeleted:"Gel\u00f6scht"}
 };
 
-// ─── DATA ─────────────────────────────────────────────────────────────────────
-let services=[
+// ─── DATA & STORAGE ───────────────────────────────────────────────────────────
+const DEFAULT_SERVICES=[
   {id:1,title:"Bike Rental",title_ar:"\u062a\u0623\u062c\u064a\u0631 \u062f\u0631\u0627\u062c\u0629",title_ru:"\u0410\u0440\u0435\u043d\u0434\u0430 \u0432\u0435\u043b\u043e\u0441\u0438\u043f\u0435\u0434\u0430",title_de:"Fahrradverleih",
    description:"Explore the area freely on a well-maintained bicycle.",
    description_ar:"\u0627\u0633\u062a\u0643\u0634\u0641 \u0627\u0644\u0645\u0646\u0637\u0642\u0629 \u0628\u062d\u0631\u064a\u0629 \u0639\u0644\u0649 \u062f\u0631\u0627\u062c\u0629 \u0645\u064f\u0635\u0627\u0646\u0629 \u062c\u064a\u062f\u0627\u064b.",
@@ -511,7 +511,18 @@ let services=[
    description_de:"Frische Bettw\u00e4sche und Handt\u00fccher werden gewechselt.",
    price:0,image:"https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80",category:"Cleaning"}
 ];
-let nextId=20,editingId=null,deleteId=null,activeFilter="All",lang="en";
+
+function loadServices(){
+  const stored=localStorage.getItem("stayServices");
+  return stored?JSON.parse(stored):DEFAULT_SERVICES;
+}
+function saveServices(){
+  localStorage.setItem("stayServices",JSON.stringify(services));
+}
+
+let services=loadServices();
+let nextId=Math.max(...services.map(s=>s.id),20)+1;
+let editingId=null,deleteId=null,activeFilter="All",lang="en";
 const ICONS={"Rentals":"\ud83d\udeb4","Transport":"\ud83d\ude97","Cleaning":"\ud83e\uddf9","default":"\ud83c\udfe0"};
 
 // ─── I18N ENGINE ─────────────────────────────────────────────────────────────
@@ -677,6 +688,7 @@ function saveService(){
   const sv={title,description:desc,price:Number(price),image:img,category:cat};
   if(editingId){const i=services.findIndex(x=>x.id===editingId);services[i]={...services[i],...sv};toast(t.tUpdated,"ok");}
   else{services.unshift({id:nextId++,...sv});toast(t.tAdded,"ok");}
+  saveServices();
   closeModal();renderAdmin();
 }
 function showE(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.remove("hidden");}}
@@ -702,6 +714,7 @@ function askDel(id){deleteId=id;document.getElementById("del-modal").classList.r
 function closeDel(){deleteId=null;document.getElementById("del-modal").classList.add("hidden");}
 function confirmDel(){
   services=services.filter(x=>x.id!==deleteId);
+  saveServices();
   closeDel();renderAdmin();toast(T[lang].tDeleted,"inf");
 }
 
