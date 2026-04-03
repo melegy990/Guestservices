@@ -291,34 +291,31 @@ body.rtl .modal-h h3{font-family:'Tajawal',sans-serif}
   </div>
 </div>
 
-<div id="book-modal" class="overlay hidden" onclick="if(event.target===this)closeBooking()">
-  <div class="modal" style="max-width:460px">
-    <div class="modal-h"><h3 id="bk-ttl">Book Service</h3><button class="modal-x" onclick="closeBooking()">&#215;</button></div>
-    <div class="modal-b">
-      <div style="background:var(--sand);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px">
-        <span id="bk-icon" style="font-size:32px"></span>
-        <div><div id="bk-svc-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600"></div>
-          <div id="bk-svc-price" style="font-size:13px;color:var(--muted);margin-top:2px"></div></div>
+<div id="contact-modal" class="overlay hidden" onclick="if(event.target===this)closeContact()">
+  <div class="modal" style="max-width:460px;text-align:center">
+    <div class="modal-h"><h3 id="contact-ttl">Contact Us</h3><button class="modal-x" onclick="closeContact()">&#215;</button></div>
+    <div class="modal-b" style="padding:32px">
+      <div style="background:var(--sand);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px">
+        <span id="contact-icon" style="font-size:32px"></span>
+        <div><div id="contact-svc-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600"></div>
+          <div id="contact-svc-price" style="font-size:13px;color:var(--muted);margin-top:2px"></div></div>
       </div>
-      <div class="fg"><label class="fl" id="lbl-bname">Name</label><input class="fi" id="bk-name"/></div>
-      <div class="fg"><label class="fl" id="lbl-broom">Room</label><input class="fi" id="bk-room"/></div>
-      <div class="fg"><label class="fl" id="lbl-bphone">Phone</label><input class="fi" id="bk-phone" type="tel"/></div>
-      <div class="fg"><label class="fl" id="lbl-bdate">Date</label><input class="fi" id="bk-date" type="date"/></div>
-      <div class="fg"><label class="fl" id="lbl-bnotes">Notes</label><textarea class="ft" id="bk-notes" style="min-height:70px"></textarea></div>
-      <div id="bk-err" class="ferr hidden"></div>
-    </div>
-    <div class="modal-f"><button class="btn-cancel" onclick="closeBooking()" id="bk-cancel">Cancel</button><button class="btn-save" onclick="submitBooking()" id="bk-confirm">Confirm &#10003;</button></div>
-  </div>
-</div>
-
-<div id="ok-modal" class="overlay hidden" onclick="if(event.target===this)closeOk()">
-  <div class="modal" style="max-width:400px;text-align:center">
-    <div class="modal-b" style="padding:48px 32px">
-      <div style="font-size:64px;margin-bottom:16px">&#9989;</div>
-      <h3 style="font-family:'Playfair Display',serif;font-size:24px;margin-bottom:12px" id="ok-h">Booking Received!</h3>
-      <p style="color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:8px" id="ok-msg"></p>
-      <p style="color:var(--muted);font-size:14px;line-height:1.6" id="ok-sub">Our team will contact you shortly.</p>
-      <button class="btn-save" style="margin-top:28px;width:100%" onclick="closeOk()" id="ok-back">Back</button>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:24px" id="contact-msg">Choose how you'd like to contact us:</p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <a href="tel:+201002922929" style="text-decoration:none">
+          <button class="btn-full" style="display:flex;align-items:center;justify-content:center;gap:12px;background:var(--ocean)">
+            <span style="font-size:20px">&#128222;</span>
+            <span id="contact-call">Call Now</span>
+          </button>
+        </a>
+        <a href="https://wa.me/201002922929" target="_blank" style="text-decoration:none">
+          <button class="btn-full" style="display:flex;align-items:center;justify-content:center;gap:12px;background:#25D366">
+            <span style="font-size:20px">&#128172;</span>
+            <span id="contact-whatsapp">WhatsApp</span>
+          </button>
+        </a>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-top:20px">+20 100 292 2929</p>
     </div>
   </div>
 </div>
@@ -342,8 +339,9 @@ en:{rtl:false,
   heroP:"Browse everything you need during your stay \u2014 transport, cleaning, rentals and more. Book in seconds.",
   svc:"Services",cats:"Categories",sup:"Support",
   filterLbl:"Filter:",all:"All",
-  priceReq:"Price on request",egpDay:"EGP / day",bookNow:"Book Now",
+  priceReq:"Price on request",egpDay:"EGP / day",bookNow:"Contact Now",
   noSvc:"No services found",noSvcSub:"Try selecting a different category.",
+  contactTtl:"Contact Us",contactMsg:"Choose how you'd like to contact us:",contactCall:"Call Now",contactWhatsApp:"WhatsApp",
   loginSub:"Admin Management Portal",loginH2:"Sign In",
   lblEmail:"Email Address",lblPass:"Password",
   loginBtn:"Sign In \u2192",backBtn:"\u2190 Back to Site",loginErr:"\u26a0\ufe0f Invalid email or password.",logging:"Signing in...",
@@ -373,8 +371,9 @@ ar:{rtl:true,
   heroP:"\u062a\u0635\u0641\u062d \u0643\u0644 \u0645\u0627 \u062a\u062d\u062a\u0627\u062c\u0647 \u062e\u0644\u0627\u0644 \u0625\u0642\u0627\u0645\u062a\u0643 \u2014 \u0645\u0648\u0627\u0635\u0644\u0627\u062a\u060c \u062a\u0646\u0638\u064a\u0641\u060c \u062a\u0623\u062c\u064a\u0631 \u0648\u0623\u0643\u062b\u0631. \u0627\u062d\u062c\u0632 \u0641\u064a \u062b\u0648\u0627\u0646.",
   svc:"\u062e\u062f\u0645\u0629",cats:"\u0641\u0626\u0629",sup:"\u062f\u0639\u0645 24/7",
   filterLbl:"\u062a\u0635\u0641\u064a\u0629:",all:"\u0627\u0644\u0643\u0644",
-  priceReq:"\u0627\u0644\u0633\u0639\u0631 \u0639\u0646\u062f \u0627\u0644\u0637\u0644\u0628",egpDay:"\u062c\u0646\u064a\u0647 / \u064a\u0648\u0645",bookNow:"\u0627\u062d\u062c\u0632 \u0627\u0644\u0622\u0646",
+  priceReq:"\u0627\u0644\u0633\u0639\u0631 \u0639\u0646\u062f \u0627\u0644\u0637\u0644\u0628",egpDay:"\u062c\u0646\u064a\u0647 / \u064a\u0648\u0645",bookNow:"\u0627\u062a\u0635\u0644 \u0627\u0644\u0622\u0646",
   noSvc:"\u0644\u0627 \u062a\u0648\u062c\u062f \u062e\u062f\u0645\u0627\u062a",noSvcSub:"\u062c\u0631\u0651\u0628 \u062a\u0635\u0641\u064a\u0629 \u0645\u062e\u062a\u0644\u0641\u0629.",
+  contactTtl:"\u0627\u062a\u0635\u0644 \u0628\u0646\u0627",contactMsg:"\u0627\u062e\u062a\u0631 \u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u062a\u0648\u0627\u0635\u0644:",contactCall:"\u0627\u062a\u0635\u0644 \u0627\u0644\u0622\u0646",contactWhatsApp:"\u0648\u0627\u062a\u0633\u0627\u0628",
   loginSub:"\u0628\u0648\u0627\u0628\u0629 \u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0645\u0648\u0642\u0639",loginH2:"\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644",
   lblEmail:"\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",lblPass:"\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631",
   loginBtn:"\u062f\u062e\u0648\u0644 \u2192",backBtn:"\u0627\u0644\u0639\u0648\u062f\u0629 \u2190",loginErr:"\u26a0\ufe0f \u0628\u064a\u0627\u0646\u0627\u062a \u063a\u064a\u0631 \u0635\u062d\u064a\u062d\u0629",logging:"\u062c\u0627\u0631\u064d ...",
@@ -403,8 +402,9 @@ ru:{rtl:false,
   heroP:"\u0412\u0441\u0451 \u0434\u043b\u044f \u043f\u0440\u043e\u0436\u0438\u0432\u0430\u043d\u0438\u044f \u2014 \u0442\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442, \u0443\u0431\u043e\u0440\u043a\u0430, \u0430\u0440\u0435\u043d\u0434\u0430 \u0438 \u043c\u043d\u043e\u0433\u043e\u0435 \u0434\u0440\u0443\u0433\u043e\u0435. \u0411\u0440\u043e\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u0437\u0430 \u0441\u0435\u043a\u0443\u043d\u0434\u044b.",
   svc:"\u0423\u0441\u043b\u0443\u0433\u0438",cats:"\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438",sup:"\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430",
   filterLbl:"\u0424\u0438\u043b\u044c\u0442\u0440:",all:"\u0412\u0441\u0435",
-  priceReq:"\u0426\u0435\u043d\u0430 \u043f\u043e \u0437\u0430\u043f\u0440\u043e\u0441\u0443",egpDay:"EGP / \u0434\u0435\u043d\u044c",bookNow:"\u0417\u0430\u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
+  priceReq:"\u0426\u0435\u043d\u0430 \u043f\u043e \u0437\u0430\u043f\u0440\u043e\u0441\u0443",egpDay:"EGP / \u0434\u0435\u043d\u044c",bookNow:"\u0421\u0432\u044f\u0437\u0430\u0442\u044c\u0441\u044f",
   noSvc:"\u0423\u0441\u043b\u0443\u0433 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e",noSvcSub:"\u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044e.",
+  contactTtl:"\u0421\u0432\u044f\u0437\u0430\u0442\u044c\u0441\u044f \u0441 \u043d\u0430\u043c\u0438",contactMsg:"\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u0441\u0432\u044f\u0437\u0438:",contactCall:"\u041fozвонить",contactWhatsApp:"WhatsApp",
   loginSub:"\u041f\u0430\u043d\u0435\u043b\u044c \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f",loginH2:"\u0412\u0445\u043e\u0434",
   lblEmail:"\u042d\u043b. \u043f\u043e\u0447\u0442\u0430",lblPass:"\u041f\u0430\u0440\u043e\u043b\u044c",
   loginBtn:"\u0412\u043e\u0439\u0442\u0438 \u2192",backBtn:"\u2190 \u041d\u0430 \u0441\u0430\u0439\u0442",loginErr:"\u26a0\ufe0f \u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 email \u0438\u043b\u0438 \u043f\u0430\u0440\u043e\u043b\u044c",logging:"\u0412\u0445\u043e\u0434...",
@@ -433,8 +433,9 @@ de:{rtl:false,
   heroP:"Alles f\u00fcr Ihren Aufenthalt \u2014 Transport, Reinigung, Vermietung und mehr. In Sekunden buchen.",
   svc:"Dienste",cats:"Kategorien",sup:"Support",
   filterLbl:"Filter:",all:"Alle",
-  priceReq:"Preis auf Anfrage",egpDay:"EGP / Tag",bookNow:"Jetzt buchen",
+  priceReq:"Preis auf Anfrage",egpDay:"EGP / Tag",bookNow:"Kontakt",
   noSvc:"Keine Dienste gefunden",noSvcSub:"Andere Kategorie w\u00e4hlen.",
+  contactTtl:"Kontaktieren Sie uns",contactMsg:"W\u00e4hlen Sie, wie Sie uns kontaktieren m\u00f6chten:",contactCall:"Jetzt anrufen",contactWhatsApp:"WhatsApp",
   loginSub:"Admin-Portal",loginH2:"Anmelden",
   lblEmail:"E-Mail",lblPass:"Passwort",
   loginBtn:"Anmelden \u2192",backBtn:"\u2190 Zur\u00fcck",loginErr:"\u26a0\ufe0f Ung\u00fcltige Anmeldedaten",logging:"Wird angemeldet...",
@@ -681,34 +682,20 @@ function saveService(){
 function showE(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.remove("hidden");}}
 function hideE(id){const e=document.getElementById(id);if(e)e.classList.add("hidden");}
 
-// ─── BOOKING ─────────────────────────────────────────────────────────────────
+// ─── CONTACT ──────────────────────────────────────────────────────────────────
 function openBook(id){
   const t=T[lang];
   const sv=services.find(x=>x.id===id);if(!sv)return;
-  s("bk-svc-title",sf(sv,"title"));
-  s("bk-svc-price",sv.price>0?sv.price.toLocaleString()+" "+t.egpDay:t.bkPriceConf);
-  document.getElementById("bk-icon").textContent=ICONS[sv.category]||ICONS.default;
-  ["bk-name","bk-room","bk-phone","bk-date","bk-notes"].forEach(i=>{const e=document.getElementById(i);if(e)e.value="";});
-  document.getElementById("bk-err").classList.add("hidden");
-  document.getElementById("book-modal")._id=id;
-  document.getElementById("book-modal").classList.remove("hidden");
+  s("contact-svc-title",sf(sv,"title"));
+  s("contact-svc-price",sv.price>0?sv.price.toLocaleString()+" "+t.egpDay:t.priceReq);
+  document.getElementById("contact-icon").textContent=ICONS[sv.category]||ICONS.default;
+  s("contact-ttl",t.contactTtl);
+  s("contact-msg",t.contactMsg);
+  s("contact-call",t.contactCall);
+  s("contact-whatsapp",t.contactWhatsApp);
+  document.getElementById("contact-modal").classList.remove("hidden");
 }
-function closeBooking(){document.getElementById("book-modal").classList.add("hidden");}
-function submitBooking(){
-  const t=T[lang];
-  const nm=document.getElementById("bk-name").value.trim();
-  const rm=document.getElementById("bk-room").value.trim();
-  const ph=document.getElementById("bk-phone").value.trim();
-  const err=document.getElementById("bk-err");
-  if(!nm||!rm||!ph){err.textContent=t.bkErr;err.classList.remove("hidden");return;}
-  err.classList.add("hidden");
-  const sv=services.find(x=>x.id===document.getElementById("book-modal")._id);
-  closeBooking();
-  document.getElementById("ok-msg").innerHTML=t.okMsgPre+" <strong>"+esc(sf(sv,"title"))+"</strong>.";
-  s("ok-h",t.okH);s("ok-sub",t.okSub);s("ok-back",t.okBack);
-  document.getElementById("ok-modal").classList.remove("hidden");
-}
-function closeOk(){document.getElementById("ok-modal").classList.add("hidden");}
+function closeContact(){document.getElementById("contact-modal").classList.add("hidden");}
 
 // ─── DELETE ───────────────────────────────────────────────────────────────────
 function askDel(id){deleteId=id;document.getElementById("del-modal").classList.remove("hidden");}
