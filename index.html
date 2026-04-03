@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Stay Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sand:#f5f0e8;--sand-dark:#e8dfc8;--ocean:#0a4f6e;--ocean-light:#1a6f96;
+  --coral:#e8604a;--coral-light:#ff8570;--gold:#c9a84c;--text:#1a1a2e;
+  --muted:#6b7280;--radius:16px;
+  --shadow:0 4px 24px rgba(10,79,110,.10);--shadow-lg:0 12px 40px rgba(10,79,110,.18);
+  --font-body:'DM Sans',sans-serif;
+}
+body{font-family:var(--font-body);background:var(--sand);color:var(--text);min-height:100vh}
+body.rtl{direction:rtl;text-align:right}
+body.rtl .sidebar{left:auto;right:0}
+body.rtl .admin-main{margin-left:0;margin-right:240px}
+body.rtl .sb-link{text-align:right}
+body.rtl th{text-align:right}
+body.rtl .stat-card{border-left:none;border-right:4px solid var(--ocean)}
+body.rtl .stat-card.c{border-right-color:var(--coral)}
+body.rtl .stat-card.g{border-right-color:var(--gold)}
+body.rtl #toasts{right:auto;left:24px}
+@media(max-width:768px){body.rtl .admin-main{margin-right:0!important}}
+/* NAV */
+.nav{background:var(--ocean);padding:0 24px;display:flex;align-items:center;justify-content:space-between;min-height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.15);gap:12px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:-.5px}
+.nav-logo span{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nav-btn{padding:7px 16px;border-radius:50px;border:none;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:500;transition:all .2s}
+.nav-ghost{background:rgba(255,255,255,.1);color:#fff}.nav-ghost:hover{background:rgba(255,255,255,.2)}
+/* LANG SWITCHER */
+.lang-sw{display:flex;gap:3px;background:rgba(0,0,0,.25);border-radius:50px;padding:3px}
+.lb{padding:5px 11px;border-radius:50px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:transparent;color:rgba(255,255,255,.6);transition:all .18s;font-family:var(--font-body)}
+.lb:hover{color:#fff}.lb.active{background:var(--gold);color:#1a1a2e}
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--ocean) 0%,var(--ocean-light) 50%,#1a8fa8 100%);padding:80px 32px 100px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:60px;background:var(--sand);clip-path:ellipse(55% 100% at 50% 100%)}
+.hero-pill{display:inline-block;background:rgba(201,168,76,.2);color:var(--gold);border:1px solid rgba(201,168,76,.4);padding:6px 18px;border-radius:50px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,52px);color:#fff;font-weight:700;line-height:1.2;margin-bottom:16px}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero p{color:rgba(255,255,255,.75);font-size:16px;max-width:500px;margin:0 auto;line-height:1.7}
+.hero-stats{display:flex;gap:40px;justify-content:center;margin-top:40px;flex-wrap:wrap}
+.hero-stat{color:rgba(255,255,255,.8)}.hero-stat strong{display:block;font-size:28px;color:var(--gold);font-family:'Playfair Display',serif}
+.hero-stat span{font-size:11px;letter-spacing:1px;text-transform:uppercase}
+body.rtl .hero h1{font-family:'Tajawal',sans-serif;font-size:clamp(28px,5vw,52px)}
+/* FILTERS */
+.filter-bar{padding:28px 32px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;max-width:900px;margin:0 auto}
+.filter-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-right:6px}
+.filter-btn{padding:8px 20px;border-radius:50px;border:2px solid var(--sand-dark);background:#fff;color:var(--muted);cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;font-family:var(--font-body)}
+.filter-btn:hover{border-color:var(--ocean-light);color:var(--ocean)}
+.filter-btn.active{background:var(--ocean);border-color:var(--ocean);color:#fff}
+/* GRID */
+.services-section{padding:0 32px 80px}
+.services-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
+/* CARD */
+.card{background:rgba(255,255,255,.92);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:all .3s cubic-bezier(.34,1.56,.64,1);border:1px solid rgba(255,255,255,.8)}
+.card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+.card-img{width:100%;height:200px;object-fit:cover;display:block}
+.card-img-ph{width:100%;height:200px;background:linear-gradient(135deg,var(--sand-dark),var(--ocean-light));display:flex;align-items:center;justify-content:center;font-size:48px}
+.card-body{padding:20px}
+.card-cat{display:inline-block;background:rgba(10,79,110,.08);color:var(--ocean);padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px}
+.card-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:8px;line-height:1.3}
+body.rtl .card-title{font-family:'Tajawal',sans-serif;font-size:20px}
+.card-desc{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:16px}
+.card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--sand-dark)}
+.card-price{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--coral)}
+body.rtl .card-price{font-family:'Tajawal',sans-serif}
+.card-price small{font-size:12px;font-family:var(--font-body);color:var(--muted);font-weight:400}
+.card-cta{padding:8px 18px;background:var(--ocean);color:#fff;border:none;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)}
+.card-cta:hover{background:var(--ocean-light);transform:scale(1.03)}
+.empty{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted)}
+.empty .e-icon{font-size:56px;display:block;margin-bottom:16px}
+.empty h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--text);margin-bottom:8px}
+/* FOOTER */
+.footer{background:var(--ocean);color:rgba(255,255,255,.6);text-align:center;padding:24px;font-size:13px}
+.footer strong{color:var(--gold)}
+/* LOGIN */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--ocean) 0%,#0d2b4f 100%);padding:20px}
+.login-card{background:#fff;border-radius:24px;padding:48px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.login-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--ocean);margin-bottom:6px}
+.login-logo span{color:var(--gold)}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:28px}
+.login-card h2{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:4px}
+.hint{background:#f0f7ff;border-radius:8px;padding:10px 14px;font-size:12px;color:#4a6fa5;margin-bottom:20px}
+/* FORM */
+.fg{margin-bottom:18px}
+.fl{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
+.fi,.ft,.fs{width:100%;padding:12px 16px;border:2px solid var(--sand-dark);border-radius:10px;font-family:var(--font-body);font-size:14px;color:var(--text);background:var(--sand);transition:border-color .2s;outline:none}
+.fi:focus,.ft:focus,.fs:focus{border-color:var(--ocean-light);background:#fff}
+.ft{resize:vertical;min-height:90px}
+.ferr{color:var(--coral);font-size:12px;margin-top:6px}
+.btn-full{width:100%;padding:14px;background:var(--ocean);color:#fff;border:none;border-radius:10px;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-full:hover{background:var(--ocean-light)}.btn-full:disabled{opacity:.6;cursor:not-allowed}
+/* ADMIN */
+.admin-wrap{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--ocean);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sb-logo{padding:24px 20px;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;border-bottom:1px solid rgba(255,255,255,.1);line-height:1.3}
+.sb-logo span{color:var(--gold)}.sb-logo small{font-size:11px;font-weight:400;color:rgba(255,255,255,.4);font-family:var(--font-body);display:block;margin-top:2px}
+.sb-label{padding:20px 20px 8px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.sb-link{display:flex;align-items:center;gap:12px;padding:12px 20px;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;border:none;background:none;width:100%;text-align:left;font-family:var(--font-body)}
+.sb-link:hover{background:rgba(255,255,255,.08);color:#fff}
+.sb-link.active{background:rgba(255,255,255,.15);color:#fff}
+.sb-bottom{margin-top:auto;padding:20px;border-top:1px solid rgba(255,255,255,.1)}
+.sb-logout{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.6);cursor:pointer;font-size:13px;background:none;border:none;width:100%;font-family:var(--font-body);padding:8px 0;transition:color .2s}
+.sb-logout:hover{color:var(--coral-light)}
+.admin-main{margin-left:240px;flex:1;background:#f0f4f8;min-height:100vh}
+.admin-head{background:#fff;padding:20px 32px;border-bottom:1px solid #e5e9ef;display:flex;align-items:center;justify-content:space-between}
+.admin-head h1{font-family:'Playfair Display',serif;font-size:22px}
+.admin-body{padding:32px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;margin-bottom:28px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border-left:4px solid var(--ocean)}
+.stat-card.c{border-left-color:var(--coral)}.stat-card.g{border-left-color:var(--gold)}
+.stat-n{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--ocean)}
+.stat-card.c .stat-n{color:var(--coral)}.stat-card.g .stat-n{color:var(--gold)}
+.stat-l{font-size:13px;color:var(--muted);margin-top:4px}
+.tbl-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.tbl-head{padding:20px 24px;border-bottom:1px solid var(--sand-dark);display:flex;align-items:center;justify-content:space-between}
+.tbl-head h2{font-family:'Playfair Display',serif;font-size:18px}
+.btn-add{padding:10px 20px;background:var(--coral);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)}
+.btn-add:hover{background:var(--coral-light);transform:translateY(-1px)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 16px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--sand);border-bottom:1px solid var(--sand-dark)}
+td{padding:14px 16px;border-bottom:1px solid #f0f4f8;font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:none}tr:hover td{background:#fafbfc}
+.t-img{width:48px;height:48px;border-radius:8px;object-fit:cover}
+.t-img-ph{width:48px;height:48px;border-radius:8px;background:var(--sand-dark);display:flex;align-items:center;justify-content:center;font-size:20px}
+.badge{display:inline-block;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:600;background:rgba(10,79,110,.1);color:var(--ocean)}
+.act-btns{display:flex;gap:8px}
+.btn-edit{padding:6px 14px;background:rgba(10,79,110,.1);color:var(--ocean);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)}
+.btn-edit:hover{background:var(--ocean);color:#fff}
+.btn-del{padding:6px 14px;background:rgba(232,96,74,.1);color:var(--coral);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font-body)}
+.btn-del:hover{background:var(--coral);color:#fff}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(10,25,60,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.25)}
+.modal-h{padding:22px 28px;border-bottom:1px solid var(--sand-dark);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1}
+.modal-h h3{font-family:'Playfair Display',serif;font-size:20px}
+body.rtl .modal-h h3{font-family:'Tajawal',sans-serif}
+.modal-x{width:32px;height:32px;border:none;background:var(--sand);border-radius:50%;cursor:pointer;font-size:18px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-x:hover{background:var(--coral);color:#fff}
+.modal-b{padding:28px}
+.modal-f{padding:20px 28px;border-top:1px solid var(--sand-dark);display:flex;gap:12px;justify-content:flex-end}
+.btn-cancel{padding:10px 24px;background:var(--sand);border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-body);color:var(--text)}
+.btn-save{padding:10px 24px;background:var(--ocean);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.btn-save:hover{background:var(--ocean-light)}.btn-save:disabled{opacity:.6;cursor:not-allowed}
+.btn-danger{padding:10px 24px;background:var(--coral);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .2s}
+.btn-danger:hover{background:var(--coral-light)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.upload-area{border:2px dashed var(--sand-dark);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--sand);position:relative}
+.upload-area:hover{border-color:var(--ocean-light);background:#fff}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-preview{width:100%;height:160px;object-fit:cover;border-radius:8px;display:block}
+.upload-icon{font-size:32px;display:block;margin-bottom:8px}
+.upload-text{font-size:13px;color:var(--muted)}
+#toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:14px 20px;border-radius:10px;color:#fff;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;min-width:200px;animation:tin .3s ease}
+.toast.ok{background:#10b981}.toast.er{background:var(--coral)}.toast.inf{background:var(--ocean)}
+@keyframes tin{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
+@media(max-width:768px){
+  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap}
+  .admin-main{margin-left:0!important;margin-right:0!important}.admin-wrap{flex-direction:column}
+  .hero{padding:60px 20px 80px}.hero-stats{gap:20px}
+  .services-section{padding:0 16px 60px}.services-grid{grid-template-columns:1fr}
+  .admin-body{padding:16px}.two-col{grid-template-columns:1fr}
+  th:nth-child(4),td:nth-child(4){display:none}
+}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="page-public">
+  <nav class="nav">
+    <div class="nav-logo">Stay<span>Services</span></div>
+    <div class="nav-right">
+      <div class="lang-sw">
+        <button class="lb active" onclick="setLang('en')">EN</button>
+        <button class="lb" onclick="setLang('ar')">&#1593;</button>
+        <button class="lb" onclick="setLang('ru')">RU</button>
+        <button class="lb" onclick="setLang('de')">DE</button>
+      </div>
+      <button class="nav-btn nav-ghost" id="nav-admin-btn" onclick="goAdmin()">Admin</button>
+    </div>
+  </nav>
+  <div class="hero">
+    <div class="hero-pill" id="hero-pill">Welcome</div>
+    <h1 id="hero-h1">We're Here to Make Your<br><em id="hero-em">Stay Comfortable</em></h1>
+    <p id="hero-p">Browse everything you need during your stay.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong id="stat-count">8</strong><span id="stat-svc-lbl">Services</span></div>
+      <div class="hero-stat"><strong id="stat-cats">3</strong><span id="stat-cat-lbl">Categories</span></div>
+      <div class="hero-stat"><strong>24/7</strong><span id="stat-sup-lbl">Support</span></div>
+    </div>
+  </div>
+  <div class="filter-bar" id="filter-bar"></div>
+  <div class="services-section">
+    <div class="services-grid" id="public-grid"></div>
+  </div>
+  <footer class="footer">Powered by <strong>StayServices</strong></footer>
+</div>
+
+<div id="page-login" class="hidden login-page">
+  <div class="login-card">
+    <div class="login-logo">Stay<span>Services</span></div>
+    <div class="login-sub" id="login-sub">Admin Portal</div>
+    <h2 id="login-h2">Sign In</h2>
+    <div class="hint">admin@stay.com &nbsp;/&nbsp; admin123</div>
+    <div class="fg"><label class="fl" id="lbl-email">Email</label>
+      <input class="fi" type="email" id="l-email" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div class="fg"><label class="fl" id="lbl-pass">Password</label>
+      <input class="fi" type="password" id="l-pass" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div id="l-err" class="ferr hidden" style="margin-bottom:12px"></div>
+    <button class="btn-full" onclick="doLogin()" id="l-btn">Sign In</button>
+    <button class="btn-full" style="margin-top:10px;background:transparent;color:var(--muted);font-size:13px" onclick="show('public')" id="back-btn">Back</button>
+  </div>
+</div>
+
+<div id="page-admin" class="hidden admin-wrap">
+  <aside class="sidebar">
+    <div class="sb-logo">Stay<span>Services</span><small id="sb-sub">Admin Panel</small></div>
+    <div class="sb-label" id="sb-nav-lbl">NAVIGATION</div>
+    <button class="sb-link active" id="sb-dash">&#128202; Dashboard</button>
+    <button class="sb-link" onclick="show('public')" id="sb-pub">&#127757; Public Site</button>
+    <div class="sb-bottom">
+      <button class="sb-logout" onclick="doLogout()" id="sb-logout">&#128682; Sign Out</button>
+    </div>
+  </aside>
+  <main class="admin-main">
+    <div class="admin-head">
+      <h1 id="admin-ttl">Dashboard</h1>
+      <button class="btn-add" onclick="openModal()" id="btn-add1">+ Add</button>
+    </div>
+    <div class="admin-body">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-n" id="a-total">0</div><div class="stat-l" id="a-total-l">Total Services</div></div>
+        <div class="stat-card c"><div class="stat-n" id="a-cats">0</div><div class="stat-l" id="a-cats-l">Categories</div></div>
+        <div class="stat-card g"><div class="stat-n" id="a-val">0</div><div class="stat-l" id="a-val-l">Value</div></div>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-head">
+          <h2 id="tbl-ttl">Services</h2>
+          <button class="btn-add" onclick="openModal()" id="btn-add2">+ Add</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th id="th-img">Img</th><th id="th-ttl">Title</th><th id="th-cat">Cat</th><th id="th-price">Price</th><th id="th-act">Actions</th></tr></thead>
+            <tbody id="admin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="svc-modal" class="overlay hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-h"><h3 id="modal-ttl">Add Service</h3><button class="modal-x" onclick="closeModal()">&#215;</button></div>
+    <div class="modal-b">
+      <div class="fg">
+        <label class="fl" id="lbl-img">Image</label>
+        <div class="upload-area" id="upload-area" onclick="triggerUpload()">
+          <input type="file" id="img-file" accept="image/*" onchange="handleFile(event)" onclick="event.stopPropagation()"/>
+          <span class="upload-icon">&#128444;&#65039;</span>
+          <div class="upload-text" id="upload-hint">Click to upload</div>
+        </div>
+        <input class="fi" id="f-img" style="margin-top:8px" placeholder="Or paste URL..." oninput="previewUrl(this.value)"/>
+      </div>
+      <div class="fg"><label class="fl" id="lbl-ftitle">Title *</label><input class="fi" id="f-title"/><div class="ferr hidden" id="e-title"></div></div>
+      <div class="fg"><label class="fl" id="lbl-fdesc">Description</label><textarea class="ft" id="f-desc"></textarea></div>
+      <div class="two-col">
+        <div class="fg"><label class="fl" id="lbl-fprice">Price (EGP)</label><input class="fi" id="f-price" type="number" min="0" value="0"/><div class="ferr hidden" id="e-price"></div></div>
+        <div class="fg">
+          <label class="fl" id="lbl-fcat">Category *</label>
+          <select class="fs" id="f-cat">
+            <option value="" id="opt-ph">Select...</option>
+            <option value="Rentals" id="opt-rent">Rentals</option>
+            <option value="Transport" id="opt-trans">Transport</option>
+            <option value="Cleaning" id="opt-clean">Cleaning</option>
+            <option value="Other" id="opt-other">Other</option>
+          </select>
+          <div class="ferr hidden" id="e-cat"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-f"><button class="btn-cancel" onclick="closeModal()" id="btn-cancel">Cancel</button><button class="btn-save" id="save-btn" onclick="saveService()">Add</button></div>
+  </div>
+</div>
+
+<div id="book-modal" class="overlay hidden" onclick="if(event.target===this)closeBooking()">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-h"><h3 id="bk-ttl">Book Service</h3><button class="modal-x" onclick="closeBooking()">&#215;</button></div>
+    <div class="modal-b">
+      <div style="background:var(--sand);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px">
+        <span id="bk-icon" style="font-size:32px"></span>
+        <div><div id="bk-svc-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600"></div>
+          <div id="bk-svc-price" style="font-size:13px;color:var(--muted);margin-top:2px"></div></div>
+      </div>
+      <div class="fg"><label class="fl" id="lbl-bname">Name</label><input class="fi" id="bk-name"/></div>
+      <div class="fg"><label class="fl" id="lbl-broom">Room</label><input class="fi" id="bk-room"/></div>
+      <div class="fg"><label class="fl" id="lbl-bphone">Phone</label><input class="fi" id="bk-phone" type="tel"/></div>
+      <div class="fg"><label class="fl" id="lbl-bdate">Date</label><input class="fi" id="bk-date" type="date"/></div>
+      <div class="fg"><label class="fl" id="lbl-bnotes">Notes</label><textarea class="ft" id="bk-notes" style="min-height:70px"></textarea></div>
+      <div id="bk-err" class="ferr hidden"></div>
+    </div>
+    <div class="modal-f"><button class="btn-cancel" onclick="closeBooking()" id="bk-cancel">Cancel</button><button class="btn-save" onclick="submitBooking()" id="bk-confirm">Confirm &#10003;</button></div>
+  </div>
+</div>
+
+<div id="ok-modal" class="overlay hidden" onclick="if(event.target===this)closeOk()">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div class="modal-b" style="padding:48px 32px">
+      <div style="font-size:64px;margin-bottom:16px">&#9989;</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:24px;margin-bottom:12px" id="ok-h">Booking Received!</h3>
+      <p style="color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:8px" id="ok-msg"></p>
+      <p style="color:var(--muted);font-size:14px;line-height:1.6" id="ok-sub">Our team will contact you shortly.</p>
+      <button class="btn-save" style="margin-top:28px;width:100%" onclick="closeOk()" id="ok-back">Back</button>
+    </div>
+  </div>
+</div>
+
+<div id="del-modal" class="overlay hidden" onclick="if(event.target===this)closeDel()">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-h"><h3 id="del-ttl">Delete</h3><button class="modal-x" onclick="closeDel()">&#215;</button></div>
+    <div class="modal-b"><p style="color:var(--muted);font-size:15px;line-height:1.6" id="del-msg">Are you sure?</p></div>
+    <div class="modal-f"><button class="btn-cancel" onclick="closeDel()" id="del-cancel">Cancel</button><button class="btn-danger" onclick="confirmDel()" id="del-ok">Delete</button></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
+const T={
+en:{rtl:false,
+  pill:"Welcome to Your Stay",adminBtn:"Admin Panel \u2192",
+  heroH1:"We\u2019re Here to Make Your",heroEm:"Stay Comfortable",
+  heroP:"Browse everything you need during your stay \u2014 transport, cleaning, rentals and more. Book in seconds.",
+  svc:"Services",cats:"Categories",sup:"Support",
+  filterLbl:"Filter:",all:"All",
+  priceReq:"Price on request",egpDay:"EGP / day",bookNow:"Book Now",
+  noSvc:"No services found",noSvcSub:"Try selecting a different category.",
+  loginSub:"Admin Management Portal",loginH2:"Sign In",
+  lblEmail:"Email Address",lblPass:"Password",
+  loginBtn:"Sign In \u2192",backBtn:"\u2190 Back to Site",loginErr:"\u26a0\ufe0f Invalid email or password.",logging:"Signing in...",
+  sbSub:"Admin Panel",sbNav:"NAVIGATION",sbDash:"\ud83d\udcca Dashboard",sbPub:"\ud83c\udf0d View Public Site",sbOut:"\ud83d\udeaa Sign Out",
+  adminTtl:"Dashboard",addSvc:"+ Add Service",
+  totalSvc:"Total Services",totalCat:"Categories",totalVal:"Combined Value",
+  allSvc:"All Services",thImg:"Image",thTtl:"Title",thCat:"Category",thPrice:"Price",thAct:"Actions",
+  noSvcAdmin:"No services yet. Click Add Service to get started.",
+  editBtn:"Edit",delBtn:"Delete",
+  addModal:"Add New Service",editModal:"Edit Service",
+  lblImg:"Service Image",uploadHint:"Click to upload \u00b7 JPG, PNG, WebP",imgUrl:"Or paste image URL...",
+  lblFTitle:"Title *",lblFDesc:"Description",lblFPrice:"Price (EGP / day) \u2014 0 = on request",lblFCat:"Category *",
+  optPh:"Select...",optRent:"Rentals",optTrans:"Transport",optClean:"Cleaning",optOther:"Other",
+  cancelBtn:"Cancel",saveBtn:"Add Service",updateBtn:"Update Service",
+  errTitle:"Title is required",errPrice:"Enter a valid price",errCat:"Select a category",
+  bkTtl:"Book Service",lblBName:"Your Name",lblBRoom:"Room / Unit Number",
+  lblBPhone:"Phone Number",lblBDate:"Preferred Date",lblBNotes:"Notes (optional)",
+  bkCancel:"Cancel",bkConfirm:"Confirm Booking \u2713",
+  bkPriceConf:"Price will be confirmed",bkErr:"\u26a0\ufe0f Please fill in name, room, and phone.",
+  okH:"Booking Received!",okMsgPre:"Thank you! We received your request for",
+  okSub:"Our team will contact you shortly to confirm.",okBack:"Back to Services",
+  delTtl:"Delete Service",delMsg:"Are you sure? This cannot be undone.",delCancel:"Cancel",delOk:"Delete",
+  tUpdated:"Service updated \u2713",tAdded:"Service added \u2713",tDeleted:"Service deleted"},
+ar:{rtl:true,
+  pill:"\ud83d\udc4b \u0623\u0647\u0644\u0627\u064b \u0628\u0643 \u0641\u064a \u0625\u0642\u0627\u0645\u062a\u0643",adminBtn:"\u2190 \u0644\u0648\u062d\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629",
+  heroH1:"\u0646\u062d\u0646 \u0647\u0646\u0627 \u0644\u0646\u062c\u0639\u0644 \u0625\u0642\u0627\u0645\u062a\u0643",heroEm:"\u0645\u0631\u064a\u062d\u0629 \u0648\u0645\u0645\u064a\u0632\u0629",
+  heroP:"\u062a\u0635\u0641\u062d \u0643\u0644 \u0645\u0627 \u062a\u062d\u062a\u0627\u062c\u0647 \u062e\u0644\u0627\u0644 \u0625\u0642\u0627\u0645\u062a\u0643 \u2014 \u0645\u0648\u0627\u0635\u0644\u0627\u062a\u060c \u062a\u0646\u0638\u064a\u0641\u060c \u062a\u0623\u062c\u064a\u0631 \u0648\u0623\u0643\u062b\u0631. \u0627\u062d\u062c\u0632 \u0641\u064a \u062b\u0648\u0627\u0646.",
+  svc:"\u062e\u062f\u0645\u0629",cats:"\u0641\u0626\u0629",sup:"\u062f\u0639\u0645 24/7",
+  filterLbl:"\u062a\u0635\u0641\u064a\u0629:",all:"\u0627\u0644\u0643\u0644",
+  priceReq:"\u0627\u0644\u0633\u0639\u0631 \u0639\u0646\u062f \u0627\u0644\u0637\u0644\u0628",egpDay:"\u062c\u0646\u064a\u0647 / \u064a\u0648\u0645",bookNow:"\u0627\u062d\u062c\u0632 \u0627\u0644\u0622\u0646",
+  noSvc:"\u0644\u0627 \u062a\u0648\u062c\u062f \u062e\u062f\u0645\u0627\u062a",noSvcSub:"\u062c\u0631\u0651\u0628 \u062a\u0635\u0641\u064a\u0629 \u0645\u062e\u062a\u0644\u0641\u0629.",
+  loginSub:"\u0628\u0648\u0627\u0628\u0629 \u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0645\u0648\u0642\u0639",loginH2:"\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644",
+  lblEmail:"\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",lblPass:"\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631",
+  loginBtn:"\u062f\u062e\u0648\u0644 \u2192",backBtn:"\u0627\u0644\u0639\u0648\u062f\u0629 \u2190",loginErr:"\u26a0\ufe0f \u0628\u064a\u0627\u0646\u0627\u062a \u063a\u064a\u0631 \u0635\u062d\u064a\u062d\u0629",logging:"\u062c\u0627\u0631\u064d ...",
+  sbSub:"\u0644\u0648\u062d\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629",sbNav:"\u0627\u0644\u062a\u0646\u0642\u0644",sbDash:"\ud83d\udcca \u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u062d\u0643\u0645",sbPub:"\ud83c\udf0d \u0639\u0631\u0636 \u0627\u0644\u0645\u0648\u0642\u0639",sbOut:"\ud83d\udeaa \u062e\u0631\u0648\u062c",
+  adminTtl:"\u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u062d\u0643\u0645",addSvc:"+ \u0625\u0636\u0627\u0641\u0629 \u062e\u062f\u0645\u0629",
+  totalSvc:"\u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u062e\u062f\u0645\u0627\u062a",totalCat:"\u0627\u0644\u0641\u0626\u0627\u062a",totalVal:"\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a\u0629",
+  allSvc:"\u062c\u0645\u064a\u0639 \u0627\u0644\u062e\u062f\u0645\u0627\u062a",thImg:"\u0635\u0648\u0631\u0629",thTtl:"\u0627\u0644\u0639\u0646\u0648\u0627\u0646",thCat:"\u0627\u0644\u0641\u0626\u0629",thPrice:"\u0627\u0644\u0633\u0639\u0631",thAct:"\u0625\u062c\u0631\u0627\u0621\u0627\u062a",
+  noSvcAdmin:"\u0644\u0627 \u062a\u0648\u062c\u062f \u062e\u062f\u0645\u0627\u062a \u0628\u0639\u062f.",editBtn:"\u062a\u0639\u062f\u064a\u0644",delBtn:"\u062d\u0630\u0641",
+  addModal:"\u0625\u0636\u0627\u0641\u0629 \u062e\u062f\u0645\u0629 \u062c\u062f\u064a\u062f\u0629",editModal:"\u062a\u0639\u062f\u064a\u0644 \u0627\u0644\u062e\u062f\u0645\u0629",
+  lblImg:"\u0635\u0648\u0631\u0629 \u0627\u0644\u062e\u062f\u0645\u0629",uploadHint:"\u0627\u0636\u063a\u0637 \u0644\u0644\u0631\u0641\u0639",imgUrl:"\u0623\u0648 \u0623\u0644\u0635\u0642 \u0631\u0627\u0628\u0637 \u0627\u0644\u0635\u0648\u0631\u0629...",
+  lblFTitle:"\u0627\u0644\u0639\u0646\u0648\u0627\u0646 *",lblFDesc:"\u0627\u0644\u0648\u0635\u0641",lblFPrice:"\u0627\u0644\u0633\u0639\u0631 (\u062c\u0646\u064a\u0647/\u064a\u0648\u0645) \u2014 0 = \u0639\u0646\u062f \u0627\u0644\u0637\u0644\u0628",lblFCat:"\u0627\u0644\u0641\u0626\u0629 *",
+  optPh:"\u0627\u062e\u062a\u0631...",optRent:"\u062a\u0623\u062c\u064a\u0631",optTrans:"\u0645\u0648\u0627\u0635\u0644\u0627\u062a",optClean:"\u062a\u0646\u0638\u064a\u0641",optOther:"\u0623\u062e\u0631\u0649",
+  cancelBtn:"\u0625\u0644\u063a\u0627\u0621",saveBtn:"\u0625\u0636\u0627\u0641\u0629 \u062e\u062f\u0645\u0629",updateBtn:"\u062a\u062d\u062f\u064a\u062b",
+  errTitle:"\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0645\u0637\u0644\u0648\u0628",errPrice:"\u0623\u062f\u062e\u0644 \u0633\u0639\u0631\u0627\u064b \u0635\u062d\u064a\u062d\u0627\u064b",errCat:"\u0627\u062e\u062a\u0631 \u0641\u0626\u0629",
+  bkTtl:"\u062d\u062c\u0632 \u062e\u062f\u0645\u0629",lblBName:"\u0627\u0633\u0645\u0643",lblBRoom:"\u0631\u0642\u0645 \u0627\u0644\u063a\u0631\u0641\u0629",
+  lblBPhone:"\u0631\u0642\u0645 \u0627\u0644\u0647\u0627\u062a\u0641",lblBDate:"\u0627\u0644\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0645\u0641\u0636\u0644",lblBNotes:"\u0645\u0644\u0627\u062d\u0638\u0627\u062a",
+  bkCancel:"\u0625\u0644\u063a\u0627\u0621",bkConfirm:"\u062a\u0623\u0643\u064a\u062f \u0627\u0644\u062d\u062c\u0632 \u2713",
+  bkPriceConf:"\u0633\u064a\u062a\u0645 \u062a\u0623\u0643\u064a\u062f \u0627\u0644\u0633\u0639\u0631",bkErr:"\u26a0\ufe0f \u064a\u0631\u062c\u0649 \u062a\u0639\u0628\u0626\u0629 \u0627\u0644\u0627\u0633\u0645 \u0648\u0627\u0644\u063a\u0631\u0641\u0629 \u0648\u0627\u0644\u0647\u0627\u062a\u0641.",
+  okH:"\u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0627\u0644\u062d\u062c\u0632!",okMsgPre:"\u0634\u0643\u0631\u0627\u064b! \u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0637\u0644\u0628\u0643 \u0644\u0640",
+  okSub:"\u0633\u064a\u062a\u0648\u0627\u0635\u0644 \u0645\u0639\u0643 \u0641\u0631\u064a\u0642\u0646\u0627 \u0644\u0644\u062a\u0623\u0643\u064a\u062f.",okBack:"\u0627\u0644\u0639\u0648\u062f\u0629 \u0644\u0644\u062e\u062f\u0645\u0627\u062a",
+  delTtl:"\u062d\u0630\u0641 \u0627\u0644\u062e\u062f\u0645\u0629",delMsg:"\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f\u061f \u0644\u0627 \u064a\u0645\u0643\u0646 \u0627\u0644\u062a\u0631\u0627\u062c\u0639.",delCancel:"\u0625\u0644\u063a\u0627\u0621",delOk:"\u062d\u0630\u0641",
+  tUpdated:"\u062a\u0645 \u0627\u0644\u062a\u062d\u062f\u064a\u062b \u2713",tAdded:"\u062a\u0645\u062a \u0627\u0644\u0625\u0636\u0627\u0641\u0629 \u2713",tDeleted:"\u062a\u0645 \u0627\u0644\u062d\u0630\u0641"},
+ru:{rtl:false,
+  pill:"\ud83d\udc4b \u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c",adminBtn:"\u041f\u0430\u043d\u0435\u043b\u044c \u2192",
+  heroH1:"\u041c\u044b \u0437\u0434\u0435\u0441\u044c, \u0447\u0442\u043e\u0431\u044b \u0441\u0434\u0435\u043b\u0430\u0442\u044c \u0432\u0430\u0448",heroEm:"\u043e\u0442\u0434\u044b\u0445 \u043a\u043e\u043c\u0444\u043e\u0440\u0442\u043d\u044b\u043c",
+  heroP:"\u0412\u0441\u0451 \u0434\u043b\u044f \u043f\u0440\u043e\u0436\u0438\u0432\u0430\u043d\u0438\u044f \u2014 \u0442\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442, \u0443\u0431\u043e\u0440\u043a\u0430, \u0430\u0440\u0435\u043d\u0434\u0430 \u0438 \u043c\u043d\u043e\u0433\u043e\u0435 \u0434\u0440\u0443\u0433\u043e\u0435. \u0411\u0440\u043e\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u0437\u0430 \u0441\u0435\u043a\u0443\u043d\u0434\u044b.",
+  svc:"\u0423\u0441\u043b\u0443\u0433\u0438",cats:"\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438",sup:"\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430",
+  filterLbl:"\u0424\u0438\u043b\u044c\u0442\u0440:",all:"\u0412\u0441\u0435",
+  priceReq:"\u0426\u0435\u043d\u0430 \u043f\u043e \u0437\u0430\u043f\u0440\u043e\u0441\u0443",egpDay:"EGP / \u0434\u0435\u043d\u044c",bookNow:"\u0417\u0430\u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
+  noSvc:"\u0423\u0441\u043b\u0443\u0433 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e",noSvcSub:"\u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044e.",
+  loginSub:"\u041f\u0430\u043d\u0435\u043b\u044c \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f",loginH2:"\u0412\u0445\u043e\u0434",
+  lblEmail:"\u042d\u043b. \u043f\u043e\u0447\u0442\u0430",lblPass:"\u041f\u0430\u0440\u043e\u043b\u044c",
+  loginBtn:"\u0412\u043e\u0439\u0442\u0438 \u2192",backBtn:"\u2190 \u041d\u0430 \u0441\u0430\u0439\u0442",loginErr:"\u26a0\ufe0f \u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 email \u0438\u043b\u0438 \u043f\u0430\u0440\u043e\u043b\u044c",logging:"\u0412\u0445\u043e\u0434...",
+  sbSub:"\u041f\u0430\u043d\u0435\u043b\u044c",sbNav:"\u041d\u0410\u0412\u0418\u0413\u0410\u0426\u0418\u042f",sbDash:"\ud83d\udcca \u0414\u0430\u0448\u0431\u043e\u0440\u0434",sbPub:"\ud83c\udf0d \u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0441\u0430\u0439\u0442",sbOut:"\ud83d\udeaa \u0412\u044b\u0439\u0442\u0438",
+  adminTtl:"\u0414\u0430\u0448\u0431\u043e\u0440\u0434",addSvc:"+ \u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0443\u0441\u043b\u0443\u0433\u0443",
+  totalSvc:"\u0412\u0441\u0435\u0433\u043e \u0443\u0441\u043b\u0443\u0433",totalCat:"\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439",totalVal:"\u041e\u0431\u0449\u0430\u044f \u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c",
+  allSvc:"\u0412\u0441\u0435 \u0443\u0441\u043b\u0443\u0433\u0438",thImg:"\u0424\u043e\u0442\u043e",thTtl:"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",thCat:"\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044f",thPrice:"\u0426\u0435\u043d\u0430",thAct:"\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044f",
+  noSvcAdmin:"\u0423\u0441\u043b\u0443\u0433 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442.",editBtn:"\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c",delBtn:"\u0423\u0434\u0430\u043b\u0438\u0442\u044c",
+  addModal:"\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0443\u0441\u043b\u0443\u0433\u0443",editModal:"\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
+  lblImg:"\u0424\u043e\u0442\u043e",uploadHint:"\u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u0434\u043b\u044f \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438",imgUrl:"\u0418\u043b\u0438 \u0432\u0441\u0442\u0430\u0432\u044c\u0442\u0435 URL...",
+  lblFTitle:"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 *",lblFDesc:"\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u0435",lblFPrice:"\u0426\u0435\u043d\u0430 (EGP/\u0434\u0435\u043d\u044c) \u2014 0 = \u043f\u043e \u0437\u0430\u043f\u0440\u043e\u0441\u0443",lblFCat:"\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044f *",
+  optPh:"\u0412\u044b\u0431\u0440\u0430\u0442\u044c...",optRent:"\u0410\u0440\u0435\u043d\u0434\u0430",optTrans:"\u0422\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442",optClean:"\u0423\u0431\u043e\u0440\u043a\u0430",optOther:"\u0414\u0440\u0443\u0433\u043e\u0435",
+  cancelBtn:"\u041e\u0442\u043c\u0435\u043d\u0430",saveBtn:"\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",updateBtn:"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c",
+  errTitle:"\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",errPrice:"\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0446\u0435\u043d\u0443",errCat:"\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044e",
+  bkTtl:"\u0411\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435",lblBName:"\u0412\u0430\u0448\u0435 \u0438\u043c\u044f",lblBRoom:"\u041d\u043e\u043c\u0435\u0440 \u043a\u043e\u043c\u043d\u0430\u0442\u044b",
+  lblBPhone:"\u0422\u0435\u043b\u0435\u0444\u043e\u043d",lblBDate:"\u0416\u0435\u043b\u0430\u0435\u043c\u0430\u044f \u0434\u0430\u0442\u0430",lblBNotes:"\u0417\u0430\u043c\u0435\u0442\u043a\u0438",
+  bkCancel:"\u041e\u0442\u043c\u0435\u043d\u0430",bkConfirm:"\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c \u2713",
+  bkPriceConf:"\u0426\u0435\u043d\u0430 \u0431\u0443\u0434\u0435\u0442 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430",bkErr:"\u26a0\ufe0f \u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u0435 \u0438\u043c\u044f, \u043a\u043e\u043c\u043d\u0430\u0442\u0443 \u0438 \u0442\u0435\u043b\u0435\u0444\u043e\u043d.",
+  okH:"\u0411\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u043f\u0440\u0438\u043d\u044f\u0442\u043e!",okMsgPre:"\u0421\u043f\u0430\u0441\u0438\u0431\u043e! \u041c\u044b \u043f\u043e\u043b\u0443\u0447\u0438\u043b\u0438 \u0432\u0430\u0448 \u0437\u0430\u043f\u0440\u043e\u0441 \u043d\u0430",
+  okSub:"\u041a\u043e\u043c\u0430\u043d\u0434\u0430 \u0441\u0432\u044f\u0436\u0435\u0442\u0441\u044f \u0434\u043b\u044f \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f.",okBack:"\u041d\u0430\u0437\u0430\u0434 \u043a \u0443\u0441\u043b\u0443\u0433\u0430\u043c",
+  delTtl:"\u0423\u0434\u0430\u043b\u0438\u0442\u044c",delMsg:"\u0423\u0432\u0435\u0440\u0435\u043d\u044b? \u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043d\u0435\u043b\u044c\u0437\u044f \u043e\u0442\u043c\u0435\u043d\u0438\u0442\u044c.",delCancel:"\u041e\u0442\u043c\u0435\u043d\u0430",delOk:"\u0423\u0434\u0430\u043b\u0438\u0442\u044c",
+  tUpdated:"\u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u043e \u2713",tAdded:"\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e \u2713",tDeleted:"\u0423\u0434\u0430\u043b\u0435\u043d\u043e"},
+de:{rtl:false,
+  pill:"\ud83d\udc4b Willkommen",adminBtn:"Admin \u2192",
+  heroH1:"Wir sind hier, um Ihren",heroEm:"Aufenthalt angenehm zu machen",
+  heroP:"Alles f\u00fcr Ihren Aufenthalt \u2014 Transport, Reinigung, Vermietung und mehr. In Sekunden buchen.",
+  svc:"Dienste",cats:"Kategorien",sup:"Support",
+  filterLbl:"Filter:",all:"Alle",
+  priceReq:"Preis auf Anfrage",egpDay:"EGP / Tag",bookNow:"Jetzt buchen",
+  noSvc:"Keine Dienste gefunden",noSvcSub:"Andere Kategorie w\u00e4hlen.",
+  loginSub:"Admin-Portal",loginH2:"Anmelden",
+  lblEmail:"E-Mail",lblPass:"Passwort",
+  loginBtn:"Anmelden \u2192",backBtn:"\u2190 Zur\u00fcck",loginErr:"\u26a0\ufe0f Ung\u00fcltige Anmeldedaten",logging:"Wird angemeldet...",
+  sbSub:"Admin-Panel",sbNav:"NAVIGATION",sbDash:"\ud83d\udcca Dashboard",sbPub:"\ud83c\udf0d \u00d6ffentliche Seite",sbOut:"\ud83d\udeaa Abmelden",
+  adminTtl:"Dashboard",addSvc:"+ Dienst hinzuf\u00fcgen",
+  totalSvc:"Dienste gesamt",totalCat:"Kategorien",totalVal:"Gesamtwert",
+  allSvc:"Alle Dienste",thImg:"Bild",thTtl:"Titel",thCat:"Kategorie",thPrice:"Preis",thAct:"Aktionen",
+  noSvcAdmin:"Noch keine Dienste.",editBtn:"Bearbeiten",delBtn:"L\u00f6schen",
+  addModal:"Neuen Dienst hinzuf\u00fcgen",editModal:"Dienst bearbeiten",
+  lblImg:"Dienstbild",uploadHint:"Klicken zum Hochladen",imgUrl:"Oder Bild-URL einf\u00fcgen...",
+  lblFTitle:"Titel *",lblFDesc:"Beschreibung",lblFPrice:"Preis (EGP / Tag) \u2014 0 = auf Anfrage",lblFCat:"Kategorie *",
+  optPh:"Ausw\u00e4hlen...",optRent:"Vermietung",optTrans:"Transport",optClean:"Reinigung",optOther:"Sonstiges",
+  cancelBtn:"Abbrechen",saveBtn:"Hinzuf\u00fcgen",updateBtn:"Aktualisieren",
+  errTitle:"Titel erforderlich",errPrice:"G\u00fcltigen Preis eingeben",errCat:"Kategorie w\u00e4hlen",
+  bkTtl:"Dienst buchen",lblBName:"Ihr Name",lblBRoom:"Zimmernummer",
+  lblBPhone:"Telefonnummer",lblBDate:"Gew\u00fcnschtes Datum",lblBNotes:"Notizen (optional)",
+  bkCancel:"Abbrechen",bkConfirm:"Best\u00e4tigen \u2713",
+  bkPriceConf:"Preis wird best\u00e4tigt",bkErr:"\u26a0\ufe0f Bitte Name, Zimmer und Telefon ausf\u00fcllen.",
+  okH:"Buchung eingegangen!",okMsgPre:"Danke! Wir haben Ihre Anfrage f\u00fcr",
+  okSub:"Unser Team meldet sich zur Best\u00e4tigung.",okBack:"Zur\u00fcck",
+  delTtl:"Dienst l\u00f6schen",delMsg:"Sind Sie sicher? Nicht r\u00fcckg\u00e4ngig machbar.",delCancel:"Abbrechen",delOk:"L\u00f6schen",
+  tUpdated:"Aktualisiert \u2713",tAdded:"Hinzugef\u00fcgt \u2713",tDeleted:"Gel\u00f6scht"}
+};
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+let services=[
+  {id:1,title:"Bike Rental",title_ar:"\u062a\u0623\u062c\u064a\u0631 \u062f\u0631\u0627\u062c\u0629",title_ru:"\u0410\u0440\u0435\u043d\u0434\u0430 \u0432\u0435\u043b\u043e\u0441\u0438\u043f\u0435\u0434\u0430",title_de:"Fahrradverleih",
+   description:"Explore the area freely on a well-maintained bicycle.",
+   description_ar:"\u0627\u0633\u062a\u0643\u0634\u0641 \u0627\u0644\u0645\u0646\u0637\u0642\u0629 \u0628\u062d\u0631\u064a\u0629 \u0639\u0644\u0649 \u062f\u0631\u0627\u062c\u0629 \u0645\u064f\u0635\u0627\u0646\u0629 \u062c\u064a\u062f\u0627\u064b.",
+   description_ru:"\u0418\u0441\u0441\u043b\u0435\u0434\u0443\u0439\u0442\u0435 \u043e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u0438 \u043d\u0430 \u0443\u0445\u043e\u0436\u0435\u043d\u043d\u043e\u043c \u0432\u0435\u043b\u043e\u0441\u0438\u043f\u0435\u0434\u0435.",
+   description_de:"Erkunden Sie die Gegend frei auf einem gepflegten Fahrrad.",
+   price:0,image:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",category:"Rentals"},
+  {id:2,title:"Scooter Rental",title_ar:"\u062a\u0623\u062c\u064a\u0631 \u0633\u0643\u0648\u062a\u0631",title_ru:"\u0410\u0440\u0435\u043d\u0434\u0430 \u0441\u043a\u0443\u0442\u0435\u0440\u0430",title_de:"Rollervermietung",
+   description:"Get around faster with a reliable scooter. Helmet provided.",
+   description_ar:"\u062a\u0646\u0642\u0651\u0644 \u0628\u0633\u0631\u0639\u0629 \u0645\u0639 \u0633\u0643\u0648\u062a\u0631 \u0645\u0648\u062b\u0648\u0642. \u0627\u0644\u062e\u0648\u0630\u0629 \u0645\u062a\u0648\u0641\u0631\u0629.",
+   description_ru:"\u041f\u0435\u0440\u0435\u0434\u0432\u0438\u0433\u0430\u0439\u0442\u0435\u0441\u044c \u0431\u044b\u0441\u0442\u0440\u0435\u0435. \u0428\u043b\u0435\u043c \u0432\u043a\u043b\u044e\u0447\u0451\u043d.",
+   description_de:"Schneller vorankommen mit einem zuverl\u00e4ssigen Roller. Helm inklusive.",
+   price:0,image:"https://images.unsplash.com/photo-1558618047-f4e60cef3895?w=600&q=80",category:"Rentals"},
+  {id:3,title:"Car Rental — No Driver",title_ar:"\u062a\u0623\u062c\u064a\u0631 \u0633\u064a\u0627\u0631\u0629 \u2014 \u0628\u062f\u0648\u0646 \u0633\u0627\u0626\u0642",title_ru:"\u0410\u0440\u0435\u043d\u0434\u0430 \u0430\u0432\u0442\u043e \u2014 \u0431\u0435\u0437 \u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044f",title_de:"Autovermietung \u2014 ohne Fahrer",
+   description:"Drive yourself in a clean, insured car. Full-day hire available.",
+   description_ar:"\u0642\u064f\u062f \u0628\u0646\u0641\u0633\u0643 \u0633\u064a\u0627\u0631\u0629 \u0646\u0638\u064a\u0641\u0629 \u0648\u0645\u0624\u0645\u0651\u0646\u0629.",
+   description_ru:"\u0423\u043f\u0440\u0430\u0432\u043b\u044f\u0439\u0442\u0435 \u0447\u0438\u0441\u0442\u044b\u043c \u0437\u0430\u0441\u0442\u0440\u0430\u0445\u043e\u0432\u0430\u043d\u043d\u044b\u043c \u0430\u0432\u0442\u043e.",
+   description_de:"Fahren Sie selbst in einem sauberen, versicherten Auto.",
+   price:0,image:"https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80",category:"Rentals"},
+  {id:4,title:"Car Rental — With Driver",title_ar:"\u062a\u0623\u062c\u064a\u0631 \u0633\u064a\u0627\u0631\u0629 \u2014 \u0645\u0639 \u0633\u0627\u0626\u0642",title_ru:"\u0410\u0440\u0435\u043d\u0434\u0430 \u0430\u0432\u0442\u043e \u2014 \u0441 \u0432\u043e\u0434\u0438\u0442\u0435\u043b\u0435\u043c",title_de:"Autovermietung \u2014 mit Fahrer",
+   description:"Sit back while our trusted driver takes you wherever you need.",
+   description_ar:"\u0627\u0633\u062a\u0631\u062e\u0650 \u0628\u064a\u0646\u0645\u0627 \u0633\u0627\u0626\u0642\u0646\u0627 \u064a\u0623\u062e\u0630\u0643 \u0623\u064a\u0646\u0645\u0627 \u062a\u0634\u0627\u0621.",
+   description_ru:"\u0420\u0430\u0441\u0441\u043b\u0430\u0431\u044c\u0442\u0435\u0441\u044c, \u043f\u043e\u043a\u0430 \u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u0432\u0435\u0437\u0451\u0442 \u0432\u0430\u0441.",
+   description_de:"Lehnen Sie sich zur\u00fcck, w\u00e4hrend unser Fahrer Sie f\u00e4hrt.",
+   price:0,image:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80",category:"Rentals"},
+  {id:5,title:"Private Driver — Daily",title_ar:"\u0633\u0627\u0626\u0642 \u062e\u0627\u0635 \u2014 \u064a\u0648\u0645\u064a",title_ru:"\u041b\u0438\u0447\u043d\u044b\u0439 \u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u2014 \u0432\u0435\u0441\u044c \u0434\u0435\u043d\u044c",title_de:"Privatfahrer \u2014 Tagesmiete",
+   description:"A dedicated driver at your disposal for the entire day.",
+   description_ar:"\u0633\u0627\u0626\u0642 \u0645\u062e\u0635\u0635 \u0644\u0643 \u0637\u0648\u0627\u0644 \u0627\u0644\u064a\u0648\u0645.",
+   description_ru:"\u041f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u0439 \u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u043d\u0430 \u0432\u0435\u0441\u044c \u0434\u0435\u043d\u044c.",
+   description_de:"Ihr pers\u00f6nlicher Fahrer den ganzen Tag.",
+   price:0,image:"https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=600&q=80",category:"Transport"},
+  {id:6,title:"Private Driver — Hourly",title_ar:"\u0633\u0627\u0626\u0642 \u062e\u0627\u0635 \u2014 \u0628\u0627\u0644\u0633\u0627\u0639\u0629",title_ru:"\u041b\u0438\u0447\u043d\u044b\u0439 \u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u2014 \u043f\u043e\u0447\u0430\u0441\u043e\u0432\u043e",title_de:"Privatfahrer \u2014 Stundenmiete",
+   description:"Need a driver for a few hours? Book hourly, no commitment.",
+   description_ar:"\u0627\u062d\u062c\u0632 \u0628\u0627\u0644\u0633\u0627\u0639\u0629 \u062f\u0648\u0646 \u0627\u0644\u062a\u0632\u0627\u0645.",
+   description_ru:"\u0411\u0440\u043e\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u043f\u043e\u0447\u0430\u0441\u043e\u0432\u043e \u0431\u0435\u0437 \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432.",
+   description_de:"St\u00fcndlich buchbar, keine Verpflichtung.",
+   price:0,image:"https://images.unsplash.com/photo-1511527844068-006b95d162c2?w=600&q=80",category:"Transport"},
+  {id:7,title:"Full Cleaning Service",title_ar:"\u062e\u062f\u0645\u0629 \u062a\u0646\u0638\u064a\u0641 \u0643\u0627\u0645\u0644\u0629",title_ru:"\u041f\u043e\u043b\u043d\u0430\u044f \u0443\u0431\u043e\u0440\u043a\u0430",title_de:"Vollst\u00e4ndiger Reinigungsservice",
+   description:"Top-to-bottom cleaning of your unit. Everything spotless.",
+   description_ar:"\u062a\u0646\u0638\u064a\u0641 \u0634\u0627\u0645\u0644 \u0645\u0646 \u0627\u0644\u0623\u0639\u0644\u0649 \u0644\u0644\u0623\u0633\u0641\u0644.",
+   description_ru:"\u041f\u043e\u043b\u043d\u0430\u044f \u0443\u0431\u043e\u0440\u043a\u0430 \u0432\u0430\u0448\u0435\u0433\u043e \u043f\u043e\u043c\u0435\u0449\u0435\u043d\u0438\u044f.",
+   description_de:"Komplette Reinigung Ihrer Einheit.",
+   price:0,image:"https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=80",category:"Cleaning"},
+  {id:8,title:"Linen Change",title_ar:"\u062a\u063a\u064a\u064a\u0631 \u0627\u0644\u0645\u0641\u0627\u0631\u0634",title_ru:"\u0421\u043c\u0435\u043d\u0430 \u0431\u0435\u043b\u044c\u044f",title_de:"W\u00e4schewechsel",
+   description:"Fresh sheets, pillowcases and towels replaced and made up neatly.",
+   description_ar:"\u0645\u0644\u0627\u0621\u0627\u062a \u0648\u0648\u0633\u0627\u0626\u062f \u0648\u0645\u0646\u0627\u0634\u0641 \u0646\u0638\u064a\u0641\u0629 \u062a\u064f\u0628\u062f\u0651\u0644.",
+   description_ru:"\u0421\u0432\u0435\u0436\u0435\u0435 \u0431\u0435\u043b\u044c\u0451, \u043d\u0430\u0432\u043e\u043b\u043e\u0447\u043a\u0438 \u0438 \u043f\u043e\u043b\u043e\u0442\u0435\u043d\u0446\u0430 \u0437\u0430\u043c\u0435\u043d\u0435\u043d\u044b.",
+   description_de:"Frische Bettw\u00e4sche und Handt\u00fccher werden gewechselt.",
+   price:0,image:"https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80",category:"Cleaning"}
+];
+let nextId=20,editingId=null,deleteId=null,activeFilter="All",lang="en";
+const ICONS={"Rentals":"\ud83d\udeb4","Transport":"\ud83d\ude97","Cleaning":"\ud83e\uddf9","default":"\ud83c\udfe0"};
+
+// ─── I18N ENGINE ─────────────────────────────────────────────────────────────
+function s(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function a(id,at,v){const e=document.getElementById(id);if(e)e.setAttribute(at,v);}
+function setLang(l){
+  lang=l;
+  const t=T[l];
+  document.documentElement.lang=l;
+  document.body.classList.toggle("rtl",!!t.rtl);
+  // lang buttons
+  document.querySelectorAll(".lb").forEach(b=>{
+    const map={"en":"EN","ar":"\u0639","ru":"RU","de":"DE"};
+    b.classList.toggle("active",b.textContent.trim()===map[l]);
+  });
+  s("nav-admin-btn",t.adminBtn);
+  s("hero-pill",t.pill);
+  document.getElementById("hero-h1").innerHTML=t.heroH1+"<br><em>"+t.heroEm+"</em>";
+  s("hero-p",t.heroP);
+  s("stat-svc-lbl",t.svc);s("stat-cat-lbl",t.cats);s("stat-sup-lbl",t.sup);
+  s("login-sub",t.loginSub);s("login-h2",t.loginH2);
+  s("lbl-email",t.lblEmail);s("lbl-pass",t.lblPass);
+  s("l-btn",t.loginBtn);s("back-btn",t.backBtn);
+  s("sb-sub",t.sbSub);s("sb-nav-lbl",t.sbNav);s("sb-dash",t.sbDash);s("sb-pub",t.sbPub);s("sb-logout",t.sbOut);
+  s("admin-ttl",t.adminTtl);s("btn-add1",t.addSvc);s("btn-add2",t.addSvc);
+  s("a-total-l",t.totalSvc);s("a-cats-l",t.totalCat);s("a-val-l",t.totalVal);
+  s("th-img",t.thImg);s("th-ttl",t.thTtl);s("th-cat",t.thCat);s("th-price",t.thPrice);s("th-act",t.thAct);
+  s("lbl-img",t.lblImg);s("upload-hint",t.uploadHint);a("f-img","placeholder",t.imgUrl);
+  s("lbl-ftitle",t.lblFTitle);s("lbl-fdesc",t.lblFDesc);s("lbl-fprice",t.lblFPrice);s("lbl-fcat",t.lblFCat);
+  s("opt-ph",t.optPh);s("opt-rent",t.optRent);s("opt-trans",t.optTrans);s("opt-clean",t.optClean);s("opt-other",t.optOther);
+  s("btn-cancel",t.cancelBtn);
+  s("bk-ttl",t.bkTtl);s("lbl-bname",t.lblBName);s("lbl-broom",t.lblBRoom);
+  s("lbl-bphone",t.lblBPhone);s("lbl-bdate",t.lblBDate);s("lbl-bnotes",t.lblBNotes);
+  s("bk-cancel",t.bkCancel);s("bk-confirm",t.bkConfirm);
+  s("ok-h",t.okH);s("ok-sub",t.okSub);s("ok-back",t.okBack);
+  s("del-ttl",t.delTtl);s("del-msg",t.delMsg);s("del-cancel",t.delCancel);s("del-ok",t.delOk);
+  if(!document.getElementById("page-admin").classList.contains("hidden"))renderAdmin();
+  renderPublic();
+}
+function sf(svc,f){
+  if(lang==="ar"&&svc[f+"_ar"])return svc[f+"_ar"];
+  if(lang==="ru"&&svc[f+"_ru"])return svc[f+"_ru"];
+  if(lang==="de"&&svc[f+"_de"])return svc[f+"_de"];
+  return svc[f]||"";
+}
+function catLbl(c){
+  const m={Rentals:{ar:"\u062a\u0623\u062c\u064a\u0631",ru:"\u0410\u0440\u0435\u043d\u0434\u0430",de:"Vermietung"},
+    Transport:{ar:"\u0645\u0648\u0627\u0635\u0644\u0627\u062a",ru:"\u0422\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442",de:"Transport"},
+    Cleaning:{ar:"\u062a\u0646\u0638\u064a\u0641",ru:"\u0423\u0431\u043e\u0440\u043a\u0430",de:"Reinigung"},
+    Other:{ar:"\u0623\u062e\u0631\u0649",ru:"\u0414\u0440\u0443\u0433\u043e\u0435",de:"Sonstiges"}};
+  return lang==="en"?c:(m[c]&&m[c][lang])||c;
+}
+
+// ─── ROUTING ─────────────────────────────────────────────────────────────────
+function show(p){
+  ["public","login","admin"].forEach(n=>document.getElementById("page-"+n).classList.toggle("hidden",p!==n));
+  if(p==="public")renderPublic();
+  if(p==="admin")renderAdmin();
+}
+function goAdmin(){show("login");}
+function doLogin(){
+  const em=document.getElementById("l-email").value.trim(),pw=document.getElementById("l-pass").value;
+  const err=document.getElementById("l-err"),btn=document.getElementById("l-btn");
+  const t=T[lang];
+  btn.disabled=true;btn.textContent=t.logging;
+  setTimeout(()=>{
+    if(em==="admin@stay.com"&&pw==="admin123"){err.classList.add("hidden");show("admin");}
+    else{err.textContent=t.loginErr;err.classList.remove("hidden");}
+    btn.disabled=false;btn.textContent=t.loginBtn;
+  },600);
+}
+function doLogout(){show("login");}
+
+// ─── PUBLIC ───────────────────────────────────────────────────────────────────
+function renderPublic(){
+  const t=T[lang];
+  const cats=[...new Set(services.map(s=>s.category).filter(Boolean))];
+  document.getElementById("stat-count").textContent=services.length;
+  document.getElementById("stat-cats").textContent=cats.length;
+  const bar=document.getElementById("filter-bar");
+  bar.innerHTML='<span class="filter-label">'+t.filterLbl+'</span>';
+  [t.all,...cats.map(c=>catLbl(c))].forEach((lbl,i)=>{
+    const raw=i===0?"All":cats[i-1];
+    const btn=document.createElement("button");
+    btn.className="filter-btn"+(activeFilter===raw?" active":"");
+    btn.textContent=lbl;btn.onclick=()=>{activeFilter=raw;renderPublic();};
+    bar.appendChild(btn);
+  });
+  renderCards();
+}
+function renderCards(){
+  const t=T[lang];
+  const grid=document.getElementById("public-grid");
+  const list=activeFilter==="All"?services:services.filter(s=>s.category===activeFilter);
+  if(!list.length){grid.innerHTML='<div class="empty"><span class="e-icon">\ud83c\udfe0</span><h3>'+t.noSvc+'</h3><p>'+t.noSvcSub+'</p></div>';return;}
+  grid.innerHTML=list.map(s=>`<div class="card">
+    ${s.image?`<img src="${esc(s.image)}" class="card-img" onerror="this.parentElement.querySelector('.card-img-ph').style.display='flex';this.style.display='none'">`:""}
+    <div class="card-img-ph" style="${s.image?"display:none":""}"> ${ICONS[s.category]||ICONS.default}</div>
+    <div class="card-body">
+      <span class="card-cat">${esc(catLbl(s.category))}</span>
+      <div class="card-title">${esc(sf(s,"title"))}</div>
+      <div class="card-desc">${esc(sf(s,"description"))}</div>
+      <div class="card-footer">
+        <div class="card-price">${s.price>0?Number(s.price).toLocaleString()+" <small>"+t.egpDay+"</small>":'<span style="font-size:14px;color:var(--ocean)">'+t.priceReq+"</span>"}</div>
+        <button class="card-cta" onclick="openBook(${s.id})">${t.bookNow}</button>
+      </div>
+    </div></div>`).join("");
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────────────────
+function renderAdmin(){
+  const t=T[lang];
+  const cats=new Set(services.map(s=>s.category).filter(Boolean)).size;
+  const val=services.reduce((a,s)=>a+Number(s.price||0),0);
+  s("a-total",services.length);s("a-cats",cats);s("a-val",val.toLocaleString()+" EGP");
+  document.getElementById("tbl-ttl").textContent=t.allSvc+" ("+services.length+")";
+  const tb=document.getElementById("admin-tbody");
+  if(!services.length){tb.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:48px;color:var(--muted)">${t.noSvcAdmin}</td></tr>`;return;}
+  tb.innerHTML=services.map(sv=>`<tr>
+    <td>${sv.image?`<img src="${esc(sv.image)}" class="t-img" onerror="this.style.display='none'">`:`<div class="t-img-ph">${ICONS[sv.category]||ICONS.default}</div>`}</td>
+    <td><strong>${esc(sf(sv,"title"))}</strong><br><span style="font-size:12px;color:var(--muted)">${esc((sf(sv,"description")||"").slice(0,50))}...</span></td>
+    <td><span class="badge">${esc(catLbl(sv.category||""))}</span></td>
+    <td><strong style="color:var(--coral)">${sv.price>0?sv.price.toLocaleString()+" EGP":"—"}</strong></td>
+    <td><div class="act-btns"><button class="btn-edit" onclick="openModal(${sv.id})">${t.editBtn}</button><button class="btn-del" onclick="askDel(${sv.id})">${t.delBtn}</button></div></td>
+  </tr>`).join("");
+}
+
+// ─── SERVICE MODAL ────────────────────────────────────────────────────────────
+function openModal(id){
+  const t=T[lang];
+  editingId=id||null;
+  s("modal-ttl",id?t.editModal:t.addModal);
+  s("save-btn",id?t.updateBtn:t.saveBtn);
+  clearForm();
+  if(id){
+    const sv=services.find(x=>x.id===id);
+    if(sv){document.getElementById("f-title").value=sv.title||"";document.getElementById("f-desc").value=sv.description||"";
+      document.getElementById("f-price").value=sv.price||0;document.getElementById("f-cat").value=sv.category||"";
+      document.getElementById("f-img").value=sv.image||"";if(sv.image)showPrev(sv.image);}
+  }
+  document.getElementById("svc-modal").classList.remove("hidden");
+}
+function closeModal(){document.getElementById("svc-modal").classList.add("hidden");editingId=null;clearForm();}
+function clearForm(){
+  ["f-title","f-desc","f-img"].forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+  const fp=document.getElementById("f-price");if(fp)fp.value=0;
+  const fc=document.getElementById("f-cat");if(fc)fc.value="";
+  ["e-title","e-price","e-cat"].forEach(id=>{const e=document.getElementById(id);if(e){e.classList.add("hidden");e.textContent="";}});
+  resetUp();
+}
+function saveService(){
+  const t=T[lang];
+  const title=document.getElementById("f-title").value.trim();
+  const price=document.getElementById("f-price").value;
+  const cat=document.getElementById("f-cat").value;
+  const desc=document.getElementById("f-desc").value.trim();
+  const img=document.getElementById("f-img").value.trim();
+  let ok=true;
+  if(!title){showE("e-title",t.errTitle);ok=false;}else hideE("e-title");
+  if(price===""||isNaN(price)||Number(price)<0){showE("e-price",t.errPrice);ok=false;}else hideE("e-price");
+  if(!cat){showE("e-cat",t.errCat);ok=false;}else hideE("e-cat");
+  if(!ok)return;
+  const sv={title,description:desc,price:Number(price),image:img,category:cat};
+  if(editingId){const i=services.findIndex(x=>x.id===editingId);services[i]={...services[i],...sv};toast(t.tUpdated,"ok");}
+  else{services.unshift({id:nextId++,...sv});toast(t.tAdded,"ok");}
+  closeModal();renderAdmin();
+}
+function showE(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.classList.remove("hidden");}}
+function hideE(id){const e=document.getElementById(id);if(e)e.classList.add("hidden");}
+
+// ─── BOOKING ─────────────────────────────────────────────────────────────────
+function openBook(id){
+  const t=T[lang];
+  const sv=services.find(x=>x.id===id);if(!sv)return;
+  s("bk-svc-title",sf(sv,"title"));
+  s("bk-svc-price",sv.price>0?sv.price.toLocaleString()+" "+t.egpDay:t.bkPriceConf);
+  document.getElementById("bk-icon").textContent=ICONS[sv.category]||ICONS.default;
+  ["bk-name","bk-room","bk-phone","bk-date","bk-notes"].forEach(i=>{const e=document.getElementById(i);if(e)e.value="";});
+  document.getElementById("bk-err").classList.add("hidden");
+  document.getElementById("book-modal")._id=id;
+  document.getElementById("book-modal").classList.remove("hidden");
+}
+function closeBooking(){document.getElementById("book-modal").classList.add("hidden");}
+function submitBooking(){
+  const t=T[lang];
+  const nm=document.getElementById("bk-name").value.trim();
+  const rm=document.getElementById("bk-room").value.trim();
+  const ph=document.getElementById("bk-phone").value.trim();
+  const err=document.getElementById("bk-err");
+  if(!nm||!rm||!ph){err.textContent=t.bkErr;err.classList.remove("hidden");return;}
+  err.classList.add("hidden");
+  const sv=services.find(x=>x.id===document.getElementById("book-modal")._id);
+  closeBooking();
+  document.getElementById("ok-msg").innerHTML=t.okMsgPre+" <strong>"+esc(sf(sv,"title"))+"</strong>.";
+  s("ok-h",t.okH);s("ok-sub",t.okSub);s("ok-back",t.okBack);
+  document.getElementById("ok-modal").classList.remove("hidden");
+}
+function closeOk(){document.getElementById("ok-modal").classList.add("hidden");}
+
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+function askDel(id){deleteId=id;document.getElementById("del-modal").classList.remove("hidden");}
+function closeDel(){deleteId=null;document.getElementById("del-modal").classList.add("hidden");}
+function confirmDel(){
+  services=services.filter(x=>x.id!==deleteId);
+  closeDel();renderAdmin();toast(T[lang].tDeleted,"inf");
+}
+
+// ─── IMAGE UPLOAD ─────────────────────────────────────────────────────────────
+function triggerUpload(){document.getElementById("img-file").click();}
+function handleFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{document.getElementById("f-img").value=ev.target.result;showPrev(ev.target.result);};r.readAsDataURL(f);
+}
+function previewUrl(u){if(u)showPrev(u);else resetUp();}
+function showPrev(u){
+  const a=document.getElementById("upload-area");
+  a.innerHTML=`<img src="${u}" class="upload-preview" onerror="resetUp()"/>`;
+  a.onclick=()=>{resetUp();document.getElementById("f-img").value="";};
+}
+function resetUp(){
+  const a=document.getElementById("upload-area");
+  a.innerHTML=`<input type="file" id="img-file" accept="image/*" onchange="handleFile(event)" onclick="event.stopPropagation()"/><span class="upload-icon">&#128444;&#65039;</span><div class="upload-text" id="upload-hint">${T[lang].uploadHint}</div>`;
+  a.onclick=triggerUpload;
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg,type="ok"){
+  const ic={ok:"\u2713",er:"\u2717",inf:"\u2139"};
+  const el=document.createElement("div");
+  el.className="toast "+type;el.innerHTML="<span>"+ic[type]+"</span> "+msg;
+  document.getElementById("toasts").appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+function esc(v){const d=document.createElement("div");d.textContent=v||"";return d.innerHTML;}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+setLang("en");
+show("public");
+</script>
+
+</body>
+</html>
