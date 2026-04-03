@@ -21,7 +21,19 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  window.db = getFirestore(app);
+  const db = getFirestore(app);
+
+  // Make Firebase functions globally available
+  window.firebaseReady = true;
+  window.fbGetDocs = getDocs;
+  window.fbCollection = collection;
+  window.fbDoc = doc;
+  window.fbSetDoc = setDoc;
+  window.fbDeleteDoc = deleteDoc;
+  window.fbDb = db;
+
+  // Initialize services after Firebase is ready
+  if(window.initServices) window.initServices();
 </script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -529,29 +541,41 @@ const DEFAULT_SERVICES=[
 ];
 
 async function loadServices(){
-  if(!window.db){await new Promise(r=>setTimeout(r,500));if(!window.db)return DEFAULT_SERVICES;}
+  if(!window.firebaseReady){
+    await new Promise(r=>setTimeout(r,1000));
+    if(!window.firebaseReady)return DEFAULT_SERVICES;
+  }
   try{
-    const querySnapshot=await getDocs(collection(window.db,"services"));
+    const querySnapshot=await window.fbGetDocs(window.fbCollection(window.fbDb,"services"));
     if(querySnapshot.empty)return DEFAULT_SERVICES;
-    return querySnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+    return querySnapshot.docs.map(d=>({...d.data(),id:Number(d.id)}));
   }catch(e){console.error("Load error:",e);return DEFAULT_SERVICES;}
 }
 async function saveService(service){
-  if(!window.db)return;
-  try{await setDoc(doc(window.db,"services",String(service.id)),service);}
-  catch(e){console.error("Save error:",e);}
+  if(!window.firebaseReady)return;
+  try{
+    await window.fbSetDoc(window.fbDoc(window.fbDb,"services",String(service.id)),service);
+    console.log("Saved service:",service.id);
+  }catch(e){console.error("Save error:",e);}
 }
 async function deleteService(id){
-  if(!window.db)return;
-  try{await deleteDoc(doc(window.db,"services",String(id)));}
-  catch(e){console.error("Delete error:",e);}
+  if(!window.firebaseReady)return;
+  try{
+    await window.fbDeleteDoc(window.fbDoc(window.fbDb,"services",String(id)));
+    console.log("Deleted service:",id);
+  }catch(e){console.error("Delete error:",e);}
 }
 async function initServices(){
   services=await loadServices();
   nextId=Math.max(...services.map(s=>s.id),20)+1;
-  if(services===DEFAULT_SERVICES){
-    for(const s of DEFAULT_SERVICES){await saveService(s);}
+  if(services.length===0||services===DEFAULT_SERVICES){
+    console.log("Initializing default services...");
+    for(const s of DEFAULT_SERVICES){
+      await saveService(s);
+    }
+    services=DEFAULT_SERVICES;
   }
+  console.log("Loaded services:",services.length);
   renderPublic();
 }
 
