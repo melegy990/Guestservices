@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAq4ektd1yuEhjaloNqZeStwthI08nhA4g",
@@ -30,6 +30,12 @@
   window.fbDoc = doc;
   window.fbSetDoc = setDoc;
   window.fbDeleteDoc = deleteDoc;
+  window.fbAddDoc = addDoc;
+  window.fbServerTimestamp = serverTimestamp;
+  window.fbQuery = query;
+  window.fbOrderBy = orderBy;
+  window.fbLimit = limit;
+  window.fbWhere = where;
   window.fbDb = db;
 
   // Initialize services after Firebase is ready
@@ -232,6 +238,20 @@ body.rtl .modal-h h3{font-family:'Tajawal',sans-serif}
   .hero h1{font-size:clamp(24px,7vw,48px)}
 }
 .hidden{display:none!important}
+/* ANALYTICS */
+.analytics-item{padding:16px;border-bottom:1px solid var(--sand-dark);display:flex;justify-content:space-between;align-items:center;transition:background .2s}
+.analytics-item:hover{background:var(--sand)}
+.analytics-item:last-child{border-bottom:none}
+.analytics-label{font-size:14px;color:var(--text);font-weight:500}
+.analytics-count{font-size:18px;color:var(--ocean);font-weight:600}
+.analytics-bar{height:8px;background:var(--sand-dark);border-radius:4px;margin-top:8px;overflow:hidden}
+.analytics-bar-fill{height:100%;background:linear-gradient(90deg,var(--ocean),var(--ocean-light));border-radius:4px;transition:width .5s ease}
+.analytics-recent{padding:12px;border-bottom:1px solid var(--sand-dark);font-size:13px}
+.analytics-recent:last-child{border-bottom:none}
+.analytics-event{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.analytics-event-type{font-weight:600;color:var(--ocean)}
+.analytics-event-time{font-size:11px;color:var(--muted)}
+.analytics-event-detail{color:var(--muted);margin-top:4px}
 </style>
 </head>
 <body>
@@ -288,33 +308,66 @@ body.rtl .modal-h h3{font-family:'Tajawal',sans-serif}
   <aside class="sidebar">
     <div class="sb-logo">Stay<span>Services</span><small id="sb-sub">Admin Panel</small></div>
     <div class="sb-label" id="sb-nav-lbl">NAVIGATION</div>
-    <button class="sb-link active" id="sb-dash">&#128202; Dashboard</button>
+    <button class="sb-link" onclick="showAdminView('dashboard')" id="sb-dash">&#128202; Dashboard</button>
+    <button class="sb-link" onclick="showAdminView('analytics')" id="sb-analytics">&#128200; Analytics</button>
     <button class="sb-link" onclick="show('public')" id="sb-pub">&#127757; Public Site</button>
     <div class="sb-bottom">
       <button class="sb-logout" onclick="doLogout()" id="sb-logout">&#128682; Sign Out</button>
     </div>
   </aside>
   <main class="admin-main">
-    <div class="admin-head">
-      <h1 id="admin-ttl">Dashboard</h1>
-      <button class="btn-add" onclick="openModal()" id="btn-add1">+ Add</button>
-    </div>
-    <div class="admin-body">
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-n" id="a-total">0</div><div class="stat-l" id="a-total-l">Total Services</div></div>
-        <div class="stat-card c"><div class="stat-n" id="a-cats">0</div><div class="stat-l" id="a-cats-l">Categories</div></div>
-        <div class="stat-card g"><div class="stat-n" id="a-val">0</div><div class="stat-l" id="a-val-l">Value</div></div>
+    <div id="admin-dashboard-view">
+      <div class="admin-head">
+        <h1 id="admin-ttl">Dashboard</h1>
+        <button class="btn-add" onclick="openModal()" id="btn-add1">+ Add</button>
       </div>
-      <div class="tbl-card">
-        <div class="tbl-head">
-          <h2 id="tbl-ttl">Services</h2>
-          <button class="btn-add" onclick="openModal()" id="btn-add2">+ Add</button>
+      <div class="admin-body">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-n" id="a-total">0</div><div class="stat-l" id="a-total-l">Total Services</div></div>
+          <div class="stat-card c"><div class="stat-n" id="a-cats">0</div><div class="stat-l" id="a-cats-l">Categories</div></div>
+          <div class="stat-card g"><div class="stat-n" id="a-val">0</div><div class="stat-l" id="a-val-l">Value</div></div>
         </div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th id="th-img">Img</th><th id="th-ttl">Title</th><th id="th-cat">Cat</th><th id="th-price">Price</th><th id="th-act">Actions</th></tr></thead>
-            <tbody id="admin-tbody"></tbody>
-          </table>
+        <div class="tbl-card">
+          <div class="tbl-head">
+            <h2 id="tbl-ttl">Services</h2>
+            <button class="btn-add" onclick="openModal()" id="btn-add2">+ Add</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th id="th-img">Img</th><th id="th-ttl">Title</th><th id="th-cat">Cat</th><th id="th-price">Price</th><th id="th-act">Actions</th></tr></thead>
+              <tbody id="admin-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="admin-analytics-view" class="hidden">
+      <div class="admin-head">
+        <h1 id="analytics-ttl">Website Traffic Analytics</h1>
+      </div>
+      <div class="admin-body">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-n" id="analytics-visitors">0</div><div class="stat-l" id="analytics-visitors-l">Total Visitors</div></div>
+          <div class="stat-card c"><div class="stat-n" id="analytics-clicks">0</div><div class="stat-l" id="analytics-clicks-l">Service Clicks</div></div>
+          <div class="stat-card g"><div class="stat-n" id="analytics-popular">-</div><div class="stat-l" id="analytics-popular-l">Most Popular</div></div>
+        </div>
+        <div class="tbl-card">
+          <div class="tbl-head">
+            <h2 id="analytics-services-ttl">Top Services by Clicks</h2>
+          </div>
+          <div id="analytics-services-list"></div>
+        </div>
+        <div class="tbl-card" style="margin-top:24px">
+          <div class="tbl-head">
+            <h2 id="analytics-categories-ttl">Category Filters</h2>
+          </div>
+          <div id="analytics-categories-list"></div>
+        </div>
+        <div class="tbl-card" style="margin-top:24px">
+          <div class="tbl-head">
+            <h2 id="analytics-recent-ttl">Recent Activity</h2>
+          </div>
+          <div id="analytics-recent-list"></div>
         </div>
       </div>
     </div>
@@ -621,6 +674,7 @@ async function initServices(){
     }
     console.log("Loaded services:",services.length);
     renderPublic();
+    trackPageView(); // Track initial page view
   }finally{
     setTimeout(hideLoader,600);
   }
@@ -632,6 +686,55 @@ let services=DEFAULT_SERVICES;
 let nextId=20;
 let editingId=null,deleteId=null,activeFilter="All",lang="en";
 const ICONS={"Rentals":"\ud83d\udeb4","Transport":"\ud83d\ude97","Cleaning":"\ud83e\uddf9","default":"\ud83c\udfe0"};
+
+// ─── ANALYTICS TRACKING ──────────────────────────────────────────────────────
+let sessionId = null;
+function generateSessionId() {
+  return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+function getOrCreateSessionId() {
+  if (!sessionId) {
+    sessionId = sessionStorage.getItem('stayServicesSession');
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      sessionStorage.setItem('stayServicesSession', sessionId);
+    }
+  }
+  return sessionId;
+}
+async function trackEvent(eventType, data = {}) {
+  try {
+    if (!window.firebaseReady) return;
+    const eventData = {
+      eventType,
+      sessionId: getOrCreateSessionId(),
+      timestamp: window.fbServerTimestamp(),
+      language: lang,
+      ...data
+    };
+    await window.fbAddDoc(window.fbCollection(window.fbDb, 'analytics'), eventData);
+  } catch (error) {
+    console.error('Analytics tracking error:', error);
+  }
+}
+async function trackPageView() {
+  await trackEvent('page_view', {
+    page: 'home',
+    userAgent: navigator.userAgent
+  });
+}
+async function trackServiceClick(serviceId, serviceName, category) {
+  await trackEvent('service_click', {
+    serviceId,
+    serviceName,
+    category
+  });
+}
+async function trackCategoryFilter(category) {
+  await trackEvent('category_filter', {
+    category
+  });
+}
 
 // ─── I18N ENGINE ─────────────────────────────────────────────────────────────
 function s(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
@@ -688,7 +791,7 @@ function catLbl(c){
 function show(p){
   ["public","login","admin"].forEach(n=>document.getElementById("page-"+n).classList.toggle("hidden",p!==n));
   if(p==="public")renderPublic();
-  if(p==="admin")renderAdmin();
+  if(p==="admin"){renderAdmin();showAdminView('dashboard');}
 }
 function goAdmin(){show("login");}
 function doLogin(){
@@ -716,7 +819,7 @@ function renderPublic(){
     const raw=i===0?"All":cats[i-1];
     const btn=document.createElement("button");
     btn.className="filter-btn"+(activeFilter===raw?" active":"");
-    btn.textContent=lbl;btn.onclick=()=>{activeFilter=raw;renderPublic();};
+    btn.textContent=lbl;btn.onclick=()=>{activeFilter=raw;trackCategoryFilter(raw);renderPublic();};
     bar.appendChild(btn);
   });
   renderCards();
@@ -757,6 +860,163 @@ function renderAdmin(){
     <td><strong style="color:var(--coral)">${sv.price>0?sv.price.toLocaleString()+" EGP":"—"}</strong></td>
     <td><div class="act-btns"><button class="btn-edit" onclick="openModal(${sv.id})">${t.editBtn}</button><button class="btn-del" onclick="askDel(${sv.id})">${t.delBtn}</button></div></td>
   </tr>`).join("");
+}
+
+// ─── ANALYTICS VIEW ──────────────────────────────────────────────────────────
+function showAdminView(view) {
+  // Toggle sidebar active state
+  document.querySelectorAll('.sb-link').forEach(link => link.classList.remove('active'));
+  if (view === 'dashboard') {
+    document.getElementById('sb-dash').classList.add('active');
+    document.getElementById('admin-dashboard-view').classList.remove('hidden');
+    document.getElementById('admin-analytics-view').classList.add('hidden');
+  } else if (view === 'analytics') {
+    document.getElementById('sb-analytics').classList.add('active');
+    document.getElementById('admin-dashboard-view').classList.add('hidden');
+    document.getElementById('admin-analytics-view').classList.remove('hidden');
+    renderAnalytics();
+  }
+}
+
+async function renderAnalytics() {
+  try {
+    if (!window.firebaseReady) {
+      console.error('Firebase not ready');
+      return;
+    }
+
+    // Fetch all analytics data
+    const analyticsRef = window.fbCollection(window.fbDb, 'analytics');
+    const snapshot = await window.fbGetDocs(analyticsRef);
+    const events = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      events.push({
+        id: doc.id,
+        ...data,
+        timestamp: data.timestamp?.toDate() || new Date()
+      });
+    });
+
+    // Calculate statistics
+    const uniqueVisitors = new Set(events.filter(e => e.eventType === 'page_view').map(e => e.sessionId)).size;
+    const serviceClicks = events.filter(e => e.eventType === 'service_click');
+    const categoryFilters = events.filter(e => e.eventType === 'category_filter');
+
+    // Update stats cards
+    document.getElementById('analytics-visitors').textContent = uniqueVisitors;
+    document.getElementById('analytics-clicks').textContent = serviceClicks.length;
+
+    // Calculate most popular service
+    const serviceClickCounts = {};
+    serviceClicks.forEach(e => {
+      const name = e.serviceName || 'Unknown';
+      serviceClickCounts[name] = (serviceClickCounts[name] || 0) + 1;
+    });
+    const mostPopular = Object.keys(serviceClickCounts).length > 0
+      ? Object.entries(serviceClickCounts).sort((a, b) => b[1] - a[1])[0][0]
+      : '-';
+    document.getElementById('analytics-popular').textContent = mostPopular;
+
+    // Render top services
+    const servicesList = document.getElementById('analytics-services-list');
+    const sortedServices = Object.entries(serviceClickCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    if (sortedServices.length === 0) {
+      servicesList.innerHTML = '<div class="analytics-recent" style="text-align:center;color:var(--muted)">No service clicks yet</div>';
+    } else {
+      const maxClicks = sortedServices[0][1];
+      servicesList.innerHTML = sortedServices.map(([name, count]) => `
+        <div class="analytics-item">
+          <div>
+            <div class="analytics-label">${esc(name)}</div>
+            <div class="analytics-bar">
+              <div class="analytics-bar-fill" style="width:${(count / maxClicks) * 100}%"></div>
+            </div>
+          </div>
+          <div class="analytics-count">${count}</div>
+        </div>
+      `).join('');
+    }
+
+    // Render category filters
+    const categoriesList = document.getElementById('analytics-categories-list');
+    const categoryFilterCounts = {};
+    categoryFilters.forEach(e => {
+      const cat = e.category || 'Unknown';
+      categoryFilterCounts[cat] = (categoryFilterCounts[cat] || 0) + 1;
+    });
+    const sortedCategories = Object.entries(categoryFilterCounts).sort((a, b) => b[1] - a[1]);
+
+    if (sortedCategories.length === 0) {
+      categoriesList.innerHTML = '<div class="analytics-recent" style="text-align:center;color:var(--muted)">No category filters used yet</div>';
+    } else {
+      const maxCatClicks = sortedCategories[0][1];
+      categoriesList.innerHTML = sortedCategories.map(([cat, count]) => `
+        <div class="analytics-item">
+          <div>
+            <div class="analytics-label">${esc(cat)}</div>
+            <div class="analytics-bar">
+              <div class="analytics-bar-fill" style="width:${(count / maxCatClicks) * 100}%"></div>
+            </div>
+          </div>
+          <div class="analytics-count">${count}</div>
+        </div>
+      `).join('');
+    }
+
+    // Render recent activity
+    const recentList = document.getElementById('analytics-recent-list');
+    const recentEvents = events.sort((a, b) => b.timestamp - a.timestamp).slice(0, 20);
+
+    if (recentEvents.length === 0) {
+      recentList.innerHTML = '<div class="analytics-recent" style="text-align:center;color:var(--muted)">No activity yet</div>';
+    } else {
+      recentList.innerHTML = recentEvents.map(event => {
+        const timeAgo = getTimeAgo(event.timestamp);
+        let eventLabel = '';
+        let eventDetail = '';
+
+        if (event.eventType === 'page_view') {
+          eventLabel = 'Page View';
+          eventDetail = `Visitor opened the website`;
+        } else if (event.eventType === 'service_click') {
+          eventLabel = 'Service Click';
+          eventDetail = `Clicked: ${esc(event.serviceName || 'Unknown')} (${esc(event.category || 'N/A')})`;
+        } else if (event.eventType === 'category_filter') {
+          eventLabel = 'Category Filter';
+          eventDetail = `Filtered by: ${esc(event.category || 'Unknown')}`;
+        }
+
+        return `
+          <div class="analytics-recent">
+            <div class="analytics-event">
+              <span class="analytics-event-type">${eventLabel}</span>
+              <span class="analytics-event-time">${timeAgo}</span>
+            </div>
+            <div class="analytics-event-detail">${eventDetail}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (error) {
+    console.error('Error loading analytics:', error);
+    toast('Failed to load analytics data', 'error');
+  }
+}
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString();
 }
 
 // ─── SERVICE MODAL ────────────────────────────────────────────────────────────
@@ -815,6 +1075,8 @@ function hideE(id){const e=document.getElementById(id);if(e)e.classList.add("hid
 function openBook(id){
   const t=T[lang];
   const sv=services.find(x=>x.id===id);if(!sv)return;
+  // Track service click
+  trackServiceClick(id, sf(sv,"title"), sv.category);
   s("contact-svc-title",sf(sv,"title"));
   s("contact-svc-price",sv.price>0?sv.price.toLocaleString()+" "+t.egpDay:t.priceReq);
   document.getElementById("contact-icon").textContent=ICONS[sv.category]||ICONS.default;
