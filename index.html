@@ -704,7 +704,10 @@ function getOrCreateSessionId() {
 }
 async function trackEvent(eventType, data = {}) {
   try {
-    if (!window.firebaseReady) return;
+    if (!window.firebaseReady) {
+      console.log('Firebase not ready, skipping analytics tracking');
+      return;
+    }
     const eventData = {
       eventType,
       sessionId: getOrCreateSessionId(),
@@ -712,9 +715,12 @@ async function trackEvent(eventType, data = {}) {
       language: lang,
       ...data
     };
+    console.log('Tracking event:', eventType, eventData);
     await window.fbAddDoc(window.fbCollection(window.fbDb, 'analytics'), eventData);
+    console.log('Event tracked successfully:', eventType);
   } catch (error) {
     console.error('Analytics tracking error:', error);
+    console.error('Error details:', error.message, error.code);
   }
 }
 async function trackPageView() {
@@ -885,6 +891,7 @@ async function renderAnalytics() {
       return;
     }
 
+    console.log('Fetching analytics data...');
     // Fetch all analytics data
     const analyticsRef = window.fbCollection(window.fbDb, 'analytics');
     const snapshot = await window.fbGetDocs(analyticsRef);
@@ -897,6 +904,7 @@ async function renderAnalytics() {
         timestamp: data.timestamp?.toDate() || new Date()
       });
     });
+    console.log('Fetched analytics events:', events.length, events);
 
     // Calculate statistics
     const uniqueVisitors = new Set(events.filter(e => e.eventType === 'page_view').map(e => e.sessionId)).size;
