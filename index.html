@@ -673,6 +673,7 @@ async function initServices(){
       services=DEFAULT_SERVICES;
     }
     console.log("Loaded services:",services.length);
+    checkAdminSession(); // Check if admin is already logged in
     renderPublic();
     trackPageView(); // Track initial page view
   }finally{
@@ -806,12 +807,24 @@ function doLogin(){
   const t=T[lang];
   btn.disabled=true;btn.textContent=t.logging;
   setTimeout(()=>{
-    if(em==="admin@stay.com"&&pw==="admin123"){err.classList.add("hidden");show("admin");}
+    if(em==="admin@stay.com"&&pw==="admin123"){
+      err.classList.add("hidden");
+      localStorage.setItem('adminLoggedIn', 'true');
+      show("admin");
+    }
     else{err.textContent=t.loginErr;err.classList.remove("hidden");}
     btn.disabled=false;btn.textContent=t.loginBtn;
   },600);
 }
-function doLogout(){show("login");}
+function doLogout(){
+  localStorage.removeItem('adminLoggedIn');
+  show("login");
+}
+function checkAdminSession(){
+  if(localStorage.getItem('adminLoggedIn')==='true'){
+    show("admin");
+  }
+}
 
 // ─── PUBLIC ───────────────────────────────────────────────────────────────────
 function renderPublic(){
