@@ -638,13 +638,13 @@ const DEFAULT_SERVICES=[
 async function loadServices(){
   if(!window.firebaseReady){
     await new Promise(r=>setTimeout(r,1000));
-    if(!window.firebaseReady)return DEFAULT_SERVICES;
+    if(!window.firebaseReady)return [];
   }
   try{
     const querySnapshot=await window.fbGetDocs(window.fbCollection(window.fbDb,"services"));
-    if(querySnapshot.empty)return DEFAULT_SERVICES;
+    if(querySnapshot.empty)return [];
     return querySnapshot.docs.map(d=>({...d.data(),id:Number(d.id)}));
-  }catch(e){console.error("Load error:",e);return DEFAULT_SERVICES;}
+  }catch(e){console.error("Load error:",e);return [];}
 }
 async function saveService(service){
   if(!window.firebaseReady)return;
@@ -665,12 +665,12 @@ async function initServices(){
   try{
     services=await loadServices();
     nextId=Math.max(...services.map(s=>s.id),20)+1;
-    if(services.length===0||services===DEFAULT_SERVICES){
+    if(services.length===0){
       console.log("Initializing default services...");
       for(const s of DEFAULT_SERVICES){
         await saveService(s);
       }
-      services=DEFAULT_SERVICES;
+      services=DEFAULT_SERVICES.slice(); // Use a copy
     }
     console.log("Loaded services:",services.length);
     checkAdminSession(); // Check if admin is already logged in
